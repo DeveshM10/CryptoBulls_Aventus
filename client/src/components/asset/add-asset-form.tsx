@@ -1,10 +1,13 @@
-"use client"
 import { DialogForm } from "@/components/ui/dialog-form"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
+import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { apiRequest } from "@/lib/queryClient"
+import { useToast } from "@/hooks/use-toast"
 
 export interface Asset {
-  id: string
+  id?: string
   title: string
   value: string
   type: string
@@ -13,11 +16,11 @@ export interface Asset {
   trend: "up" | "down"
 }
 
-interface AddAssetFormProps {
-  onAddAsset: (asset: Asset) => void
-}
+export function AddAssetForm() {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [loading, setLoading] = useState(false)
 
-export function AddAssetForm({ onAddAsset }: AddAssetFormProps) {
   const assetTypes = [
     { value: "Property", label: "Property" },
     { value: "Investment", label: "Investment" },
@@ -27,10 +30,33 @@ export function AddAssetForm({ onAddAsset }: AddAssetFormProps) {
     { value: "Other", label: "Other" },
   ]
 
-  const handleSubmit = (formData: Record<string, any>) => {
-    // Generate a unique ID for the new asset
-    const id = `asset_${Date.now()}`
+  const addAssetMutation = useMutation({
+    mutationFn: async (asset: Asset) => {
+      setLoading(true)
+      const response = await apiRequest("POST", "/api/assets", asset)
+      const data = await response.json()
+      return data
+    },
+    onSuccess: () => {
+      setLoading(false)
+      toast({
+        title: "Asset added successfully",
+        description: "Your asset has been added to your portfolio.",
+        variant: "default",
+      })
+      queryClient.invalidateQueries({ queryKey: ["/api/assets"] })
+    },
+    onError: (error) => {
+      setLoading(false)
+      toast({
+        title: "Error adding asset",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      })
+    }
+  })
 
+  const handleSubmit = (formData: Record<string, any>) => {
     // Extract numeric value for consistent formatting
     const numericValue = Number.parseFloat(formData.value)
     const formattedValue = !isNaN(numericValue)
@@ -39,7 +65,6 @@ export function AddAssetForm({ onAddAsset }: AddAssetFormProps) {
 
     // Create new asset object
     const newAsset: Asset = {
-      id,
       title: formData.title,
       value: formattedValue,
       type: formData.type,
@@ -48,7 +73,7 @@ export function AddAssetForm({ onAddAsset }: AddAssetFormProps) {
       trend: Number.parseFloat(formData.changePercentage) >= 0 ? "up" : "down",
     }
 
-    onAddAsset(newAsset)
+    addAssetMutation.mutate(newAsset)
   }
 
   return (
@@ -56,7 +81,7 @@ export function AddAssetForm({ onAddAsset }: AddAssetFormProps) {
       title="Add New Asset"
       description="Enter the details of your new asset"
       triggerButton={
-        <Button size="sm">
+        <Button size="sm" disabled={loading}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Asset
         </Button>
