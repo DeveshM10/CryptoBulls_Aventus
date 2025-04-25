@@ -271,8 +271,8 @@ export default function ComparePage() {
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: 3-6x)</div>
                       </div>
-                      <div className={`text-xs ${(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)) >= 3 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)) >= 3 ? 'Good' : 'Needs Improvement'}
+                      <div className={`text-xs ${(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)) >= 3 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)) >= 3 ? 'Good' : 'Needs Improvement'}
                       </div>
                     </div>
 
@@ -280,12 +280,12 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Savings Rate</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100).toFixed(1)}%
+                          {((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100).toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: &gt;20%)</div>
                       </div>
-                      <div className={`text-xs ${((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100) >= 20 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100) >= 20 ? 'Excellent' : 'Almost There'}
+                      <div className={`text-xs ${((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100) >= 20 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100) >= 20 ? 'Excellent' : 'Almost There'}
                       </div>
                     </div>
                   </div>
