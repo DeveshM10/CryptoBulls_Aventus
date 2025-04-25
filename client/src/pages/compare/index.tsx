@@ -244,36 +244,50 @@ export default function ComparePage() {
               <CardDescription>Your overall financial health compared to peers</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="text-sm font-medium mb-2">Debt-to-Income</div>
-                    <div className="flex items-end gap-2">
-                      <div className="text-2xl font-bold">24%</div>
-                      <div className="text-sm text-muted-foreground">(Target: &lt;36%)</div>
+              {showCharts && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="border rounded-lg p-4">
+                      <div className="text-sm font-medium mb-2">Debt-to-Income</div>
+                      <div className="flex items-end gap-2">
+                        <div className="text-2xl font-bold">
+                          {((Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">(Target: &lt;36%)</div>
+                      </div>
+                      <div className={`text-xs ${(Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100 < 36 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {(Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100 < 36 ? 'Excellent' : 'Needs Improvement'}
+                      </div>
                     </div>
-                    <div className="text-xs text-green-500 mt-2">Excellent</div>
-                  </div>
 
-                  <div className="border rounded-lg p-4">
-                    <div className="text-sm font-medium mb-2">Emergency Fund</div>
-                    <div className="flex items-end gap-2">
-                      <div className="text-2xl font-bold">4.2x</div>
-                      <div className="text-sm text-muted-foreground">(Target: 3-6x)</div>
+                    <div className="border rounded-lg p-4">
+                      <div className="text-sm font-medium mb-2">Emergency Fund</div>
+                      <div className="flex items-end gap-2">
+                        <div className="text-2xl font-bold">
+                          {(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)).toFixed(1)}x
+                        </div>
+                        <div className="text-sm text-muted-foreground">(Target: 3-6x)</div>
+                      </div>
+                      <div className={`text-xs ${(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)) >= 3 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)) >= 3 ? 'Good' : 'Needs Improvement'}
+                      </div>
                     </div>
-                    <div className="text-xs text-green-500 mt-2">Good</div>
-                  </div>
 
-                  <div className="border rounded-lg p-4">
-                    <div className="text-sm font-medium mb-2">Savings Rate</div>
-                    <div className="flex items-end gap-2">
-                      <div className="text-2xl font-bold">18%</div>
-                      <div className="text-sm text-muted-foreground">(Target: &gt;20%)</div>
+                    <div className="border rounded-lg p-4">
+                      <div className="text-sm font-medium mb-2">Savings Rate</div>
+                      <div className="flex items-end gap-2">
+                        <div className="text-2xl font-bold">
+                          {((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">(Target: &gt;20%)</div>
+                      </div>
+                      <div className={`text-xs ${((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100) >= 20 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {((Number(benchmarkIncome) - Number(benchmarkExpenses)) / Number(benchmarkIncome) * 100) >= 20 ? 'Excellent' : 'Almost There'}
+                      </div>
                     </div>
-                    <div className="text-xs text-yellow-500 mt-2">Almost There</div>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </main>
