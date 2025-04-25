@@ -24,7 +24,8 @@ import {
   Wrench,
   LogOut,
   User,
-  ChevronRight
+  ChevronRight,
+  PlusCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
