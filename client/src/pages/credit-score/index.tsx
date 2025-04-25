@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -7,18 +8,17 @@ import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TrendingUp, CreditCard, Clock, AlertCircle, CheckCircle, Download, Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Sidebar } from "@/components/layout/sidebar";
-import { Progress } from "@/components/ui/progress";
-import { RefreshCw, ShieldCheck, AlertTriangle } from "lucide-react";
-
+import { Sidebar } from "@/components/layout/sidebar"
+import { Progress } from "@/components/ui/progress"
+import { RefreshCw, ShieldCheck, AlertTriangle } from "lucide-react"
 
 export default function CreditScorePage() {
   // State for credit score factors
-  const [creditUtilization, setCreditUtilization] = useState(30)
-  const [paymentHistory, setPaymentHistory] = useState(95)
-  const [creditAge, setCreditAge] = useState(5)
-  const [inquiries, setInquiries] = useState(2)
-  const [creditMix, setCreditMix] = useState(3)
+  const [creditUtilization, setCreditUtilization] = useState<number[]>([30])
+  const [paymentHistory, setPaymentHistory] = useState<number[]>([95])
+  const [creditAge, setCreditAge] = useState<number[]>([5])
+  const [inquiries, setInquiries] = useState<number[]>([2])
+  const [creditMix, setCreditMix] = useState<number[]>([3])
 
   // State for calculated score
   const [score, setScore] = useState(0)
@@ -31,11 +31,11 @@ export default function CreditScorePage() {
   // Calculate credit score based on factors
   useEffect(() => {
     let calculatedScore = 300
-    calculatedScore += (paymentHistory / 100) * 300
-    calculatedScore += ((100 - creditUtilization) / 100) * 255
-    calculatedScore += (Math.min(creditAge, 30) / 30) * 128
-    calculatedScore += ((10 - Math.min(inquiries, 10)) / 10) * 85
-    calculatedScore += (creditMix / 5) * 85
+    calculatedScore += (paymentHistory[0] / 100) * 300
+    calculatedScore += ((100 - creditUtilization[0]) / 100) * 255
+    calculatedScore += (Math.min(creditAge[0], 30) / 30) * 128
+    calculatedScore += ((10 - Math.min(inquiries[0], 10)) / 10) * 85
+    calculatedScore += (creditMix[0] / 5) * 85
     calculatedScore = Math.round(Math.min(calculatedScore, 850))
 
     setScore(calculatedScore)
@@ -57,12 +57,6 @@ export default function CreditScorePage() {
       setScoreColor("text-rose-500")
     }
   }, [creditUtilization, paymentHistory, creditAge, inquiries, creditMix])
-
-  const scrollToRecommendations = () => {
-    if (recommendationsRef.current) {
-      recommendationsRef.current.scrollIntoView({ behavior: "smooth" })
-    }
-  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -147,9 +141,9 @@ export default function CreditScorePage() {
                         <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                         <span className="font-medium">Payment History</span>
                       </div>
-                      <span className="text-sm font-medium">{paymentHistory}%</span>
+                      <span className="text-sm font-medium">{paymentHistory[0]}%</span>
                     </div>
-                    <Slider value={paymentHistory} onChange={setPaymentHistory} min={0} max={100} />
+                    <Slider value={paymentHistory} onValueChange={setPaymentHistory} min={0} max={100} step={1} />
                     <p className="mt-1 text-xs text-muted-foreground">You've never missed a payment. Keep it up!</p>
                   </div>
 
@@ -159,9 +153,9 @@ export default function CreditScorePage() {
                         <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                         <span className="font-medium">Credit Utilization</span>
                       </div>
-                      <span className="text-sm font-medium">{creditUtilization}%</span>
+                      <span className="text-sm font-medium">{creditUtilization[0]}%</span>
                     </div>
-                    <Slider value={creditUtilization} onChange={setCreditUtilization} min={0} max={100} />
+                    <Slider value={creditUtilization} onValueChange={setCreditUtilization} min={0} max={100} step={1} />
                     <p className="mt-1 text-xs text-muted-foreground">You're using a small portion of your available credit. Excellent!</p>
                   </div>
 
@@ -171,9 +165,9 @@ export default function CreditScorePage() {
                         <AlertTriangle className="h-4 w-4 mr-2 text-yellow-500" />
                         <span className="font-medium">Credit Age</span>
                       </div>
-                      <span className="text-sm font-medium">{creditAge} years</span>
+                      <span className="text-sm font-medium">{creditAge[0]} years</span>
                     </div>
-                    <Slider value={creditAge} onChange={setCreditAge} min={0} max={30} step={1} />
+                    <Slider value={creditAge} onValueChange={setCreditAge} min={0} max={30} step={1} />
                     <p className="mt-1 text-xs text-muted-foreground">Your credit history is relatively young. This will improve with time.</p>
                   </div>
 
@@ -183,9 +177,9 @@ export default function CreditScorePage() {
                         <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                         <span className="font-medium">Account Mix</span>
                       </div>
-                      <span className="text-sm font-medium">{creditMix} accounts</span>
+                      <span className="text-sm font-medium">{creditMix[0]} accounts</span>
                     </div>
-                    <Slider value={creditMix} onChange={setCreditMix} min={1} max={5} step={1} />
+                    <Slider value={creditMix} onValueChange={setCreditMix} min={1} max={5} step={1} />
                     <p className="mt-1 text-xs text-muted-foreground">You have a good mix of credit types. This helps your score.</p>
                   </div>
 
@@ -195,9 +189,9 @@ export default function CreditScorePage() {
                         <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                         <span className="font-medium">Recent Applications</span>
                       </div>
-                      <span className="text-sm font-medium">{inquiries} inquiries</span>
+                      <span className="text-sm font-medium">{inquiries[0]} inquiries</span>
                     </div>
-                    <Slider value={inquiries} onChange={setInquiries} min={0} max={10} step={1} />
+                    <Slider value={inquiries} onValueChange={setInquiries} min={0} max={10} step={1} />
                     <p className="mt-1 text-xs text-muted-foreground">You have few recent credit inquiries. This is positive for your score.</p>
                   </div>
                 </div>
