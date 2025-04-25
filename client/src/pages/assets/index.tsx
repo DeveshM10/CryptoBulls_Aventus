@@ -77,6 +77,137 @@ const CustomTooltip = ({ active, payload, formatter }: any) => {
 export default function AssetsPage() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  
+  // Set up form
+  const form = useForm<AssetFormValues>({
+    resolver: zodResolver(assetFormSchema),
+    defaultValues: {
+      title: "",
+      value: "",
+      type: "",
+      date: new Date().toISOString().split('T')[0],
+      change: "0%",
+      trend: "up",
+    },
+  });
+  
+  // Query to fetch assets
+  const { data: assets = [], isLoading } = useQuery({
+    queryKey: ['/api/assets'],
+    queryFn: async () => {
+      const response = await fetch('/api/assets');
+      if (!response.ok) {
+        throw new Error('Failed to fetch assets');
+      }
+      return response.json();
+    },
+  });
+  
+  // Mutation to create a new asset
+  const createAssetMutation = useMutation({
+    mutationFn: async (newAsset: AssetFormValues) => {
+      const response = await fetch('/api/assets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newAsset),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create asset');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      // Close the dialog and reset form
+      setOpen(false);
+      form.reset();
+      
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: ['/api/assets'] });
+      
+      // Show success message
+      toast({
+        title: "Asset Added",
+        description: "Your asset has been successfully added.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add asset. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle form submission
+  function onSubmit(data: AssetFormValues) {
+    createAssetMutation.mutate(data);
+  }
+  
+  // Define asset interface to fix type issues
+  interface Asset {
+    _id: string;
+    userId: string;
+    title: string;
+    value: string;
+    type: string;
+    date: string;
+    change: string;
+    trend: 'up' | 'down';
+  }
+  
+  // Calculate totals and prepare chart data
+  const totalAssetValue = assets.reduce((sum: number, asset: Asset) => 
+    sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0);
+  
+  // Prepare chart data for asset types distribution
+  type ChartDataItem = { name: string; value: number };
+  
+  const assetTypeData = assets.reduce((acc: ChartDataItem[], asset: Asset) => {
+    const existingType = acc.find(item => item.name === asset.type);
+    const assetValue = Number(asset.value.replace(/[^0-9.-]+/g, ''));
+    
+    if (existingType) {
+      existingType.value += assetValue;
+    } else {
+      acc.push({
+        name: asset.type,
+        value: assetValue
+      });
+    }
+    
+    return acc;
+  }, []);
+  
+  // Prepare data for asset growth chart - simplified version
+  const currentMonth = new Date().getMonth();
+  const last6Months = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(currentMonth - 5 + i);
+    return date.toLocaleString('default', { month: 'short' });
+  });
+  
+  const growthData = last6Months.map(month => {
+    const assetsForMonth = assets.filter((asset: Asset) => 
+      asset.date.includes(month)
+    );
+    const totalForMonth = assetsForMonth.reduce(
+      (sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 
+      0
+    );
+    
+    return {
+      name: month,
+      value: totalForMonth || 0
+    };
+  });
+  
+  // Colors for pie chart
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#ec4899'];
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -107,10 +238,169 @@ export default function AssetsPage() {
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Assets</h1>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Asset
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Asset
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[550px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Asset</DialogTitle>
+                    <DialogDescription>
+                      Add details of your asset below. Click save when you're done.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Asset Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Primary Home, Tesla Stock" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              Enter the name of your asset
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="value"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Value ($)</FormLabel>
+                            <FormControl>
+                              <Input type="text" placeholder="e.g., 100000" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              Current value of your asset in USD
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Asset Type</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select asset type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {assetTypes.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              The category this asset belongs to
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Date Added/Purchased</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              When you acquired this asset
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="change"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Change Percentage</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="text" 
+                                placeholder="e.g., 5.2%" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              How much has this asset changed in value (e.g., 5.2%)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="trend"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Trend Direction</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select trend" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="up">Up</SelectItem>
+                                <SelectItem value="down">Down</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Is the asset value trending up or down?
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <DialogFooter>
+                        <Button 
+                          type="submit" 
+                          disabled={createAssetMutation.isPending}
+                        >
+                          {createAssetMutation.isPending ? "Adding..." : "Add Asset"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -120,10 +410,20 @@ export default function AssetsPage() {
                 <Wallet className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$164,320.25</div>
-                <p className="text-xs text-muted-foreground">
-                  +5.2% <span className="ml-1">from last month</span>
-                </p>
+                {isLoading ? (
+                  <div className="h-12 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${totalAssetValue.toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {assets.length} <span className="ml-1">total assets</span>
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
             
@@ -133,10 +433,23 @@ export default function AssetsPage() {
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$120,000.00</div>
-                <p className="text-xs text-muted-foreground">
-                  +2.5% <span className="ml-1">from last month</span>
-                </p>
+                {isLoading ? (
+                  <div className="h-12 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${assets
+                          .filter((asset: Asset) => asset.type.includes('real_estate'))
+                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
+                          .toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {assets.filter((asset: Asset) => asset.type.includes('real_estate')).length} <span className="ml-1">properties</span>
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
             
@@ -146,10 +459,23 @@ export default function AssetsPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$37,500.75</div>
-                <p className="text-xs text-muted-foreground">
-                  +12.3% <span className="ml-1">from last month</span>
-                </p>
+                {isLoading ? (
+                  <div className="h-12 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${assets
+                          .filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type)))
+                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
+                          .toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {assets.filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type))).length} <span className="ml-1">investment assets</span>
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
             
@@ -159,20 +485,68 @@ export default function AssetsPage() {
                 <Wallet className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$6,819.50</div>
-                <p className="text-xs text-muted-foreground">
-                  +1.8% <span className="ml-1">from last month</span>
-                </p>
+                {isLoading ? (
+                  <div className="h-12 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ${assets
+                          .filter((asset: Asset) => asset.type.includes('cash'))
+                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
+                          .toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {assets.filter((asset: Asset) => asset.type.includes('cash')).length} <span className="ml-1">cash accounts</span>
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
 
           <Card className="col-span-full">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Asset Breakdown</CardTitle>
+              <div className="text-sm text-muted-foreground">
+                {assets.length > 0 ? 
+                  `Total: $${totalAssetValue.toLocaleString()}` : 
+                  "No assets to display"
+                }
+              </div>
             </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center border rounded-lg">
-              <p className="text-sm text-muted-foreground">Asset distribution chart will display here</p>
+            <CardContent className="h-[300px]">
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+                </div>
+              ) : assets.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <p className="text-muted-foreground">No assets found</p>
+                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={assetTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {assetTypeData.map((entry: ChartDataItem, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
           
@@ -180,8 +554,129 @@ export default function AssetsPage() {
             <CardHeader>
               <CardTitle>Asset Growth</CardTitle>
             </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center border rounded-lg">
-              <p className="text-sm text-muted-foreground">Asset growth chart will display here</p>
+            <CardContent className="h-[300px]">
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+                </div>
+              ) : assets.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <p className="text-muted-foreground">No assets found</p>
+                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={growthData}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis 
+                      tickFormatter={(value) => `$${value.toLocaleString()}`}
+                    />
+                    <Tooltip
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Total Value']}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                      name="Asset Value"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card className="col-span-full">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Your Assets</CardTitle>
+              <div className="text-sm text-muted-foreground">
+                {assets.length} assets total
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+                </div>
+              ) : assets.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                  <p className="text-muted-foreground">No assets found</p>
+                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <div className="grid grid-cols-6 gap-4 p-4 text-sm font-medium border-b bg-muted/50">
+                    <div>Name</div>
+                    <div>Type</div>
+                    <div>Value</div>
+                    <div>Date Added</div>
+                    <div>Change</div>
+                    <div className="text-right">Actions</div>
+                  </div>
+                  {assets.map((asset: Asset) => (
+                    <div key={asset._id} className="grid grid-cols-6 gap-4 p-4 text-sm items-center border-b last:border-0">
+                      <div className="font-medium">{asset.title}</div>
+                      <div className="text-muted-foreground">
+                        {assetTypes.find(t => t.value === asset.type)?.label || asset.type}
+                      </div>
+                      <div>${Number(asset.value.replace(/[^0-9.-]+/g, '')).toLocaleString()}</div>
+                      <div className="text-muted-foreground">{new Date(asset.date).toLocaleDateString()}</div>
+                      <div className={asset.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
+                        {asset.trend === 'up' ? '+' : '-'}{asset.change}
+                      </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4"
+                          >
+                            <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                          </svg>
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4"
+                          >
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                          </svg>
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </main>
