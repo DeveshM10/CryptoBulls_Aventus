@@ -35,7 +35,9 @@ export default function ComparePage() {
   const [benchmarkValues, setBenchmarkValues] = useState({
     portfolio: 120000,
     expenses: 4500,
-    goals: 300000
+    goals: 300000,
+    liabilities: 50000,
+    income: 8000
   });
   const [showCharts, setShowCharts] = useState(false);
 
@@ -251,7 +253,7 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Debt-to-Income</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {((Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100).toFixed(1)}%
+                          {((Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100).toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: &lt;36%)</div>
                       </div>
