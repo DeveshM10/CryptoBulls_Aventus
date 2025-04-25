@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -144,6 +143,11 @@ export default function CreditScorePage() {
                       <span className="text-sm font-medium">{paymentHistory[0]}%</span>
                     </div>
                     <Slider value={paymentHistory} onValueChange={setPaymentHistory} min={0} max={100} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Min: 0% (Poor)</span>
+                      <span>Target: 95% (Good)</span>
+                      <span>Max: 100% (Excellent)</span>
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">You've never missed a payment. Keep it up!</p>
                   </div>
 
@@ -156,6 +160,11 @@ export default function CreditScorePage() {
                       <span className="text-sm font-medium">{creditUtilization[0]}%</span>
                     </div>
                     <Slider value={creditUtilization} onValueChange={setCreditUtilization} min={0} max={100} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Min: 0% (Excellent)</span>
+                      <span>Target: 30% (Good)</span>
+                      <span>Max: 100% (Poor)</span>
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">You're using a small portion of your available credit. Excellent!</p>
                   </div>
 
@@ -168,6 +177,11 @@ export default function CreditScorePage() {
                       <span className="text-sm font-medium">{creditAge[0]} years</span>
                     </div>
                     <Slider value={creditAge} onValueChange={setCreditAge} min={0} max={30} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Min: 0 years</span>
+                      <span>Target: 5 years</span>
+                      <span>Max: 30 years</span>
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">Your credit history is relatively young. This will improve with time.</p>
                   </div>
 
@@ -180,6 +194,11 @@ export default function CreditScorePage() {
                       <span className="text-sm font-medium">{creditMix[0]} accounts</span>
                     </div>
                     <Slider value={creditMix} onValueChange={setCreditMix} min={1} max={5} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Min: 1 account</span>
+                      <span>Target: 3 accounts</span>
+                      <span>Max: 5 accounts</span>
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">You have a good mix of credit types. This helps your score.</p>
                   </div>
 
@@ -192,6 +211,11 @@ export default function CreditScorePage() {
                       <span className="text-sm font-medium">{inquiries[0]} inquiries</span>
                     </div>
                     <Slider value={inquiries} onValueChange={setInquiries} min={0} max={10} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Min: 0 inquiries</span>
+                      <span>Target: 2 inquiries</span>
+                      <span>Max: 10 inquiries</span>
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">You have few recent credit inquiries. This is positive for your score.</p>
                   </div>
                 </div>
@@ -204,6 +228,7 @@ export default function CreditScorePage() {
                 <CardDescription>How your credit score has changed over time</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px] flex items-center justify-center border rounded-lg">
+                {/* Placeholder for chart */}
                 <p className="text-sm text-muted-foreground">Credit score history chart will display here</p>
               </CardContent>
             </Card>
