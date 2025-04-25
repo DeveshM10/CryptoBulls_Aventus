@@ -1,9 +1,82 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Plus, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Wallet, Plus, TrendingUp, ArrowUpRight, Filter, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+
+// Define asset form schema
+const assetFormSchema = z.object({
+  title: z.string().min(2, "Asset name must be at least 2 characters"),
+  value: z.string().min(1, "Asset value is required"),
+  type: z.string().min(1, "Asset type is required"),
+  date: z.string().min(1, "Date is required"),
+  change: z.string().default("0%"),
+  trend: z.enum(["up", "down"]).default("up"),
+});
+
+type AssetFormValues = z.infer<typeof assetFormSchema>;
+
+// Asset Types List
+const assetTypes = [
+  { value: "real_estate", label: "Real Estate" },
+  { value: "stocks", label: "Stocks" },
+  { value: "crypto", label: "Cryptocurrency" },
+  { value: "cash", label: "Cash & Equivalents" },
+  { value: "vehicles", label: "Vehicles" },
+  { value: "collectibles", label: "Collectibles & Art" },
+  { value: "retirement", label: "Retirement Accounts" },
+  { value: "other", label: "Other" },
+];
+
+// Custom tooltip component for charts
+const CustomTooltip = ({ active, payload, formatter }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background border rounded-md shadow-sm p-2 text-sm">
+        <p className="font-medium">{payload[0].name}</p>
+        <p className="text-primary">${Number(payload[0].value).toLocaleString()}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function AssetsPage() {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
