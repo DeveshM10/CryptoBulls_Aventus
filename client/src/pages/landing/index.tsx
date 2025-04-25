@@ -10,7 +10,8 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+      <AnimatedBackground />
       {/* Header Section */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
@@ -131,14 +132,34 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mx-auto flex items-center justify-center">
-              <div className="relative w-full h-[350px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-primary/10 to-indigo-500/10 border">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-primary/30">
-                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
+              <ThreeDCard className="w-full h-[350px] md:h-[400px] lg:h-[500px] border bg-gradient-to-br from-primary/5 to-indigo-500/5">
+                <div className="p-8 h-full flex flex-col items-center justify-center">
+                  <div className="mb-4 p-4 rounded-full bg-primary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div className="space-y-4 text-center">
+                    <h3 className="text-2xl font-bold">Blockchain-Powered Finance</h3>
+                    <p className="text-muted-foreground">Track, manage, and grow your assets with advanced security and real-time insights.</p>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center gap-1 text-primary">
+                        <Wallet className="h-4 w-4" />
+                        <span className="text-sm">Crypto</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-primary">
+                        <LineChart className="h-4 w-4" />
+                        <span className="text-sm">Analytics</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-primary">
+                        <Lock className="h-4 w-4" />
+                        <span className="text-sm">Secure</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </ThreeDCard>
             </div>
           </div>
         </div>
@@ -157,32 +178,29 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mx-auto grid gap-6 py-12 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
-            <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-background shadow-sm">
+            <ThreeDCard className="flex flex-col items-center space-y-4 border rounded-lg p-6 bg-background shadow-sm">
               <div className="p-3 rounded-full bg-primary/10">
                 <Wallet className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Asset Management</h3>
               <p className="text-muted-foreground text-center">Track all your traditional and crypto assets in a unified dashboard with real-time updates.</p>
-            </div>
-            <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-background shadow-sm">
+            </ThreeDCard>
+            
+            <ThreeDCard className="flex flex-col items-center space-y-4 border rounded-lg p-6 bg-background shadow-sm">
               <div className="p-3 rounded-full bg-primary/10">
                 <Shield className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Blockchain Security</h3>
               <p className="text-muted-foreground text-center">Benefit from immutable transaction records and enhanced security through blockchain technology.</p>
-            </div>
-            <div className="flex flex-col items-center space-y-2 border rounded-lg p-6 bg-background shadow-sm">
+            </ThreeDCard>
+            
+            <ThreeDCard className="flex flex-col items-center space-y-4 border rounded-lg p-6 bg-background shadow-sm">
               <div className="p-3 rounded-full bg-primary/10">
-                <svg className="h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1" />
-                  <path d="M12 18h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1" />
-                  <rect width="6" height="8" x="2" y="10" rx="1" />
-                  <rect width="6" height="8" x="16" y="6" rx="1" />
-                </svg>
+                <BarChart3 className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Advanced Analytics</h3>
               <p className="text-muted-foreground text-center">Gain insights into your financial health with comprehensive reports and predictive analytics.</p>
-            </div>
+            </ThreeDCard>
           </div>
         </div>
       </section>
@@ -200,7 +218,7 @@ export default function LandingPage() {
           </div>
           <div className="grid gap-6 py-12 lg:grid-cols-3 lg:gap-8">
             {/* Basic Plan */}
-            <div className="flex flex-col rounded-lg border bg-background shadow-sm">
+            <ThreeDCard className="flex flex-col rounded-lg border bg-background shadow-sm">
               <div className="p-6">
                 <h3 className="text-xl font-bold">Basic</h3>
                 <div className="mt-4 text-3xl font-bold">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
@@ -229,10 +247,10 @@ export default function LandingPage() {
                   <Button variant="outline" className="w-full">Start for Free</Button>
                 </Link>
               </div>
-            </div>
+            </ThreeDCard>
             
             {/* Pro Plan */}
-            <div className="flex flex-col rounded-lg border bg-background shadow-sm relative overflow-hidden">
+            <ThreeDCard className="flex flex-col rounded-lg border bg-background shadow-sm relative overflow-hidden" glowColor="rgba(124, 58, 237, 0.8)">
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold">Popular</div>
               <div className="p-6">
                 <h3 className="text-xl font-bold">Pro</h3>
@@ -266,10 +284,10 @@ export default function LandingPage() {
                   <Button className="w-full">Get Pro</Button>
                 </Link>
               </div>
-            </div>
+            </ThreeDCard>
 
             {/* Enterprise Plan */}
-            <div className="flex flex-col rounded-lg border bg-background shadow-sm">
+            <ThreeDCard className="flex flex-col rounded-lg border bg-background shadow-sm">
               <div className="p-6">
                 <h3 className="text-xl font-bold">Enterprise</h3>
                 <div className="mt-4 text-3xl font-bold">$49.99<span className="text-sm font-normal text-muted-foreground">/month</span></div>
@@ -302,7 +320,7 @@ export default function LandingPage() {
                   <Button variant="outline" className="w-full">Contact Sales</Button>
                 </Link>
               </div>
-            </div>
+            </ThreeDCard>
           </div>
         </div>
       </section>

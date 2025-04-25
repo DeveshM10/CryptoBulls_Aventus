@@ -43,12 +43,15 @@ export function AnimatedBackground() {
 
       getRandomColor() {
         const colors = [
-          'rgba(124, 58, 237, opacity)', // Purple (primary)
-          'rgba(79, 70, 229, opacity)',  // Indigo
-          'rgba(16, 185, 129, opacity)', // Green (success)
-          'rgba(59, 130, 246, opacity)', // Blue
+          'rgba(124, 58, 237, OPACITY)', // Purple (primary)
+          'rgba(79, 70, 229, OPACITY)',  // Indigo
+          'rgba(16, 185, 129, OPACITY)', // Green (success)
+          'rgba(59, 130, 246, OPACITY)', // Blue
         ];
-        return colors[Math.floor(Math.random() * colors.length)].replace('opacity', this.opacity.toString());
+        
+        // Get a random color and ensure opacity is a string
+        const colorBase = colors[Math.floor(Math.random() * colors.length)];
+        return colorBase.replace('OPACITY', this.opacity?.toString() || "0.3");
       }
 
       update() {
@@ -75,7 +78,8 @@ export function AnimatedBackground() {
 
     // Create particles
     const particlesArray: Particle[] = [];
-    const numberOfParticles = Math.floor((canvas.width * canvas.height) / 10000);
+    const canvasArea = canvas ? canvas.width * canvas.height : window.innerWidth * window.innerHeight;
+    const numberOfParticles = Math.floor(canvasArea / 10000);
     
     for (let i = 0; i < numberOfParticles; i++) {
       particlesArray.push(new Particle());
@@ -105,7 +109,7 @@ export function AnimatedBackground() {
 
     // Animation loop
     function animate() {
-      if (!ctx) return;
+      if (!ctx || !canvas) return;
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
