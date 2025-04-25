@@ -2,7 +2,7 @@
 <Dialog open={open} onClose={handleClose}>
   <DialogTitle>Form Title</DialogTitle>
   <DialogContent className="sm:max-w-[425px] max-h-[60vh] overflow-y-auto pr-2">
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
       {/* Your form fields */}
       <TextField
         autoFocus
