@@ -1,4 +1,3 @@
-
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart3, LineChart, PieChart, RefreshCw, TrendingUp, Wallet, DollarSign, Target, Clock } from "lucide-react";
@@ -42,9 +41,24 @@ export default function ComparePage() {
                   <SelectItem value="yearly">Yearly</SelectItem>
                 </SelectContent>
               </Select>
+              <Select defaultValue="industry">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Compare Against" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="industry">Industry Average</SelectItem>
+                  <SelectItem value="peers">Peer Group</SelectItem>
+                  <SelectItem value="target">Target Goals</SelectItem>
+                  <SelectItem value="historical">Historical Data</SelectItem>
+                </SelectContent>
+              </Select>
               <Button variant="outline" size="sm">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
+              </Button>
+              <Button variant="default" size="sm">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Generate Report
               </Button>
             </div>
           </div>
@@ -178,7 +192,7 @@ export default function ComparePage() {
                     </div>
                     <div className="text-xs text-green-500 mt-2">Excellent</div>
                   </div>
-                  
+
                   <div className="border rounded-lg p-4">
                     <div className="text-sm font-medium mb-2">Emergency Fund</div>
                     <div className="flex items-end gap-2">
@@ -187,7 +201,7 @@ export default function ComparePage() {
                     </div>
                     <div className="text-xs text-green-500 mt-2">Good</div>
                   </div>
-                  
+
                   <div className="border rounded-lg p-4">
                     <div className="text-sm font-medium mb-2">Savings Rate</div>
                     <div className="flex items-end gap-2">
