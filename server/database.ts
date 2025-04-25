@@ -1,35 +1,21 @@
-import mongoose from 'mongoose';
+import { db } from "@db";
 
-// MongoDB connection URL
-// In production, this would come from environment variables
-// For now, we'll use a local MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/finvault';
-
-// Connect to MongoDB
+// Database connection check
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('MongoDB connection successful');
-    
-    // Handle MongoDB connection events
-    mongoose.connection.on('error', (err) => {
-      console.error(`MongoDB connection error: ${err}`);
-    });
-    
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-    });
+    // Test the database connection with a simple query
+    await db.execute('SELECT 1');
+    console.log('PostgreSQL connection successful');
     
     // Handle process termination (graceful shutdown)
     process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
+      console.log('Database connection closed due to app termination');
       process.exit(0);
     });
     
-    return mongoose.connection;
+    return db;
   } catch (error) {
-    console.error(`Error connecting to MongoDB: ${error}`);
+    console.error(`Error connecting to database: ${error}`);
     process.exit(1);
   }
 };
