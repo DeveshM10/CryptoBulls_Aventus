@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { WalletConnect } from "@/components/wallet/wallet-connect";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 import { 
   LayoutDashboard, 
   Wallet, 
@@ -20,8 +21,20 @@ import {
   DollarSign,
   Briefcase,
   GraduationCap,
-  Wrench
+  Wrench,
+  LogOut,
+  User,
+  ChevronRight
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SidebarLinkProps {
   href: string;
@@ -55,6 +68,44 @@ export const Sidebar = () => {
   return (
     <aside className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 fixed h-full">
       <div className="flex flex-col h-full">
+        {/* Top Section with Wallet and User Profile */}
+        <div className="flex items-center justify-between px-4 py-4 border-b">
+          <Link href="/" className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span className="font-bold">FinVault</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+        
         {/* Wallet Connection Section */}
         <div className="flex items-center justify-between px-4 py-4">
           <div className="w-full">
@@ -134,7 +185,15 @@ export const Sidebar = () => {
               icon={<Briefcase className="h-4 w-4" />}
               isActive={location === "/blockchain"}
             >
-              Blockchain Settings
+              Blockchain
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/settings" 
+              icon={<Settings className="h-4 w-4" />}
+              isActive={location === "/settings"}
+            >
+              Settings
             </SidebarLink>
             
             <SidebarLink 
