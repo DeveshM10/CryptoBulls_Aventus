@@ -7,6 +7,10 @@ import path from "path";
 import fs from "fs";
 import { eq } from "drizzle-orm";
 import { ZodError } from "zod";
+import connectDB from "./database";
+import assetsRoutes from "./routes/assets";
+import liabilitiesRoutes from "./routes/liabilities";
+import authRoutes from "./routes/auth";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -42,6 +46,19 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Connect to MongoDB
+  try {
+    await connectDB();
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+  }
+
+  // Register MongoDB API routes
+  app.use('/api/assets', assetsRoutes);
+  app.use('/api/liabilities', liabilitiesRoutes);
+  app.use('/api/auth', authRoutes);
+
   // KYC submission endpoint
   app.post("/api/kyc", upload.single("panImage"), async (req, res) => {
     try {

@@ -1,12 +1,9 @@
-import Asset, { IAsset } from './Asset';
-import Liability, { ILiability } from './Liability';
-import User, { IUser } from './User';
+import User from './User';
+import Asset from './Asset';
+import Liability from './Liability';
 
 export {
-  Asset,
-  IAsset,
-  Liability,
-  ILiability,
   User,
-  IUser
+  Asset,
+  Liability
 };

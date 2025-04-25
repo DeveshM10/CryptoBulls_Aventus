@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IAsset extends Document {
+// Define the interface
+interface IAsset extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
   value: string;
@@ -12,17 +13,46 @@ export interface IAsset extends Document {
   updatedAt: Date;
 }
 
+// Define the schema
 const AssetSchema: Schema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true },
-  value: { type: String, required: true },
-  type: { type: String, required: true },
-  date: { type: String, required: true },
-  change: { type: String, required: true },
-  trend: { type: String, enum: ['up', 'down'], required: true },
-}, 
-{ 
-  timestamps: true 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  value: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  date: {
+    type: String,
+    required: true
+  },
+  change: {
+    type: String,
+    required: true
+  },
+  trend: {
+    type: String,
+    enum: ['up', 'down'],
+    required: true
+  }
+}, {
+  timestamps: true
 });
 
-export default mongoose.model<IAsset>('Asset', AssetSchema);
+// Create and export the model
+const Asset = mongoose.model<IAsset>('Asset', AssetSchema);
+
+export { IAsset };
+export default Asset;

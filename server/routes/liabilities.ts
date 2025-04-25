@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
-import { Liability, ILiability } from '../models';
+import { Liability } from '../models';
+import { ILiability } from '../models/Liability';
 import mongoose from 'mongoose';
 
 const router = Router();

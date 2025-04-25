@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
-import { Asset, IAsset } from '../models';
+import { Asset } from '../models';
+import { IAsset } from '../models/Asset';
 import mongoose from 'mongoose';
 
 const router = Router();
