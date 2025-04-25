@@ -1,10 +1,34 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import connectDB from "../db";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import 'dotenv/config';
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Set up session with MongoDB store
+const mongoURI = process.env.MONGODB_URI || "mongodb+srv://adrianronan7305:adrian7305@cluster2.0gmv9tc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster2";
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'finvault-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: mongoURI,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60, // 14 days
+  }),
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();

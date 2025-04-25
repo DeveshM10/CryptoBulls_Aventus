@@ -1,113 +1,104 @@
-import { Request, Response, Router } from 'express';
+import express, { Request, Response } from 'express';
 import { Liability } from '../models';
-import { ILiability } from '../models/Liability';
-import mongoose from 'mongoose';
 
-const router = Router();
+const router = express.Router();
 
-// Get all liabilities
+// Get all liabilities for the current user
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // In a real app, this would filter by the authenticated user's ID
-    // For now, we'll just return all liabilities or can use a query parameter
-    const userId = req.query.userId || null;
-    
-    let query = {};
-    if (userId && mongoose.Types.ObjectId.isValid(userId as string)) {
-      query = { userId: userId };
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
-    
-    const liabilities = await Liability.find(query).sort({ createdAt: -1 });
-    res.status(200).json(liabilities);
+
+    const liabilities = await Liability.find({ userId: req.user._id });
+    res.json(liabilities);
   } catch (error) {
     console.error('Error fetching liabilities:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Failed to fetch liabilities' });
   }
 });
 
 // Get a single liability by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const liability = await Liability.findById(req.params.id);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const liability = await Liability.findOne({ _id: req.params.id, userId: req.user._id });
     
     if (!liability) {
-      return res.status(404).json({ message: 'Liability not found' });
+      return res.status(404).json({ error: 'Liability not found' });
     }
     
-    res.status(200).json(liability);
+    res.json(liability);
   } catch (error) {
     console.error('Error fetching liability:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Failed to fetch liability' });
   }
 });
 
 // Create a new liability
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { userId, title, amount, type, interest, payment, dueDate, status } = req.body;
-    
-    if (!userId || !title || !amount || !type || !interest || !payment || !dueDate || !status) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
-    }
-    
     const newLiability = new Liability({
-      userId,
-      title,
-      amount,
-      type,
-      interest,
-      payment,
-      dueDate,
-      status
+      ...req.body,
+      userId: req.user._id,
     });
     
     const savedLiability = await newLiability.save();
     res.status(201).json(savedLiability);
   } catch (error) {
     console.error('Error creating liability:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Failed to create liability' });
   }
 });
 
 // Update a liability
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    const { title, amount, type, interest, payment, dueDate, status } = req.body;
-    
-    const updatedLiability = await Liability.findByIdAndUpdate(
-      req.params.id,
-      { title, amount, type, interest, payment, dueDate, status },
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const liability = await Liability.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      { ...req.body, userId: req.user._id },
       { new: true, runValidators: true }
     );
     
-    if (!updatedLiability) {
-      return res.status(404).json({ message: 'Liability not found' });
+    if (!liability) {
+      return res.status(404).json({ error: 'Liability not found' });
     }
     
-    res.status(200).json(updatedLiability);
+    res.json(liability);
   } catch (error) {
     console.error('Error updating liability:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Failed to update liability' });
   }
 });
 
 // Delete a liability
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const deletedLiability = await Liability.findByIdAndDelete(req.params.id);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const liability = await Liability.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
     
-    if (!deletedLiability) {
-      return res.status(404).json({ message: 'Liability not found' });
+    if (!liability) {
+      return res.status(404).json({ error: 'Liability not found' });
     }
     
     res.status(200).json({ message: 'Liability deleted successfully' });
   } catch (error) {
     console.error('Error deleting liability:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Failed to delete liability' });
   }
 });
 

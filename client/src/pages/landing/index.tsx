@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowRight, Check, ChevronRight, ExternalLink, Menu, Shield, Wallet, X } from 'lucide-react';
+import { ArrowRight, BarChart3, Check, ChevronRight, Coins, CreditCard, ExternalLink, LineChart, Lock, Menu, Shield, Smartphone, Wallet, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { AnimatedBackground } from '@/components/animations/animated-background';
+import { ThreeDCard } from '@/components/animations/3d-card';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

@@ -1,19 +1,17 @@
-import { db } from "@db";
+import mongoose from 'mongoose';
+import connectDBWithClient from "../db";
 
 // Database connection check
 const connectDB = async () => {
   try {
-    // Test the database connection with a simple query
-    await db.execute('SELECT 1');
-    console.log('PostgreSQL connection successful');
+    // Simply use the connection from db/index.ts
+    const conn = await connectDBWithClient();
     
-    // Handle process termination (graceful shutdown)
-    process.on('SIGINT', async () => {
-      console.log('Database connection closed due to app termination');
-      process.exit(0);
-    });
+    // Add a delay to ensure the connection is fully established
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    return db;
+    console.log('Database connection confirmed');
+    return conn;
   } catch (error) {
     console.error(`Error connecting to database: ${error}`);
     process.exit(1);
