@@ -7,7 +7,7 @@
   overflow-y: auto;
   scrollbar-width: thin;
   -ms-overflow-style: none;
-  height: calc(100vh - 200px);
+  max-height: calc(100vh - 120px);
   overscroll-behavior: contain;
 }
 

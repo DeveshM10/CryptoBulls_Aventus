@@ -64,7 +64,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
 
 export const Sidebar = () => {
   const [location] = useLocation();
-  
+
   return (
     <aside className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 fixed h-full">
       <div className="flex flex-col h-screen">
@@ -105,17 +105,17 @@ export const Sidebar = () => {
             </DropdownMenu>
           </div>
         </div>
-        
+
         {/* Wallet Connection Section */}
         <div className="flex items-center justify-between px-4 py-4">
           <div className="w-full">
             <WalletConnect />
           </div>
         </div>
-        
+
         {/* Main Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 160px)' }}>
-          <nav className="grid items-start px-2 text-sm font-medium gap-2">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <nav className="grid items-start px-2 py-2 text-sm font-medium gap-2">
             <SidebarLink 
               href="/dashboard" 
               icon={<LayoutDashboard className="h-4 w-4" />}
@@ -123,7 +123,7 @@ export const Sidebar = () => {
             >
               Dashboard
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/assets" 
               icon={<Wallet className="h-4 w-4" />}
@@ -131,7 +131,7 @@ export const Sidebar = () => {
             >
               Assets
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/liabilities" 
               icon={<Coins className="h-4 w-4" />}
@@ -139,7 +139,7 @@ export const Sidebar = () => {
             >
               Liabilities
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/credit-score" 
               icon={<CreditCard className="h-4 w-4" />}
@@ -147,7 +147,7 @@ export const Sidebar = () => {
             >
               Credit Score
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/compare" 
               icon={<BarChart3 className="h-4 w-4" />}
@@ -155,7 +155,7 @@ export const Sidebar = () => {
             >
               Compare
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/budget" 
               icon={<DollarSign className="h-4 w-4" />}
@@ -163,7 +163,7 @@ export const Sidebar = () => {
             >
               Budget
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/learning-hub" 
               icon={<GraduationCap className="h-4 w-4" />}
@@ -171,7 +171,7 @@ export const Sidebar = () => {
             >
               Learning Hub
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/tools" 
               icon={<Wrench className="h-4 w-4" />}
@@ -179,7 +179,7 @@ export const Sidebar = () => {
             >
               Tools
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/blockchain" 
               icon={<Briefcase className="h-4 w-4" />}
@@ -187,7 +187,7 @@ export const Sidebar = () => {
             >
               Blockchain
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/settings" 
               icon={<Settings className="h-4 w-4" />}
@@ -195,7 +195,7 @@ export const Sidebar = () => {
             >
               Settings
             </SidebarLink>
-            
+
             <SidebarLink 
               href="/reports" 
               icon={<PieChart className="h-4 w-4" />}
@@ -203,7 +203,7 @@ export const Sidebar = () => {
             >
               Reports
             </SidebarLink>
-            
+
             {/* KYC Link - Added as requested */}
             <SidebarLink 
               href="/kyc" 
