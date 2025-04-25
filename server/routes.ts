@@ -317,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // KYC submission endpoint
-  app.post("/api/kyc", upload.single("panImage"), async (req, res) => {
+  app.post("/api/kyc", requireAuth, upload.single("panImage"), async (req, res) => {
     try {
       // Extract form data
       const kycFormData = {
