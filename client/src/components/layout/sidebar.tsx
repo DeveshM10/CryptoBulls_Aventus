@@ -114,8 +114,8 @@ export const Sidebar = () => {
         </div>
         
         {/* Main Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar h-[calc(100vh-120px)] min-h-0">
-          <nav className="grid items-start px-2 text-sm font-medium gap-1">
+        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 160px)' }}>
+          <nav className="grid items-start px-2 text-sm font-medium gap-2">
             <SidebarLink 
               href="/dashboard" 
               icon={<LayoutDashboard className="h-4 w-4" />}
