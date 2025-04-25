@@ -3,10 +3,12 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusCircle, Download, Filter } from "lucide-react"
 import { AddAssetForm } from "@/components/assets/add-asset-form"
 import { useFinanceStore } from "@/components/store/finance-store"
+import { AssetDistributionChart } from "@/components/assets/asset-distribution-chart"
+import { AssetGrowthChart } from "@/components/assets/asset-growth-chart"
 
 function AssetCard({ title, value, type, date, change, trend }) {
   return (
@@ -29,6 +31,7 @@ function AssetCard({ title, value, type, date, change, trend }) {
 export default function AssetsPage() {
   const { assets, addAsset } = useFinanceStore()
   const [activeTab, setActiveTab] = useState("all")
+  const [activeView, setActiveView] = useState("grid")
 
   // Filter assets based on selected tab
   const filteredAssets =
@@ -51,35 +54,79 @@ export default function AssetsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full md:w-auto grid-cols-4 h-auto md:h-10">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="property"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Property
-          </TabsTrigger>
-          <TabsTrigger
-            value="investment"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Investments
-          </TabsTrigger>
-          <TabsTrigger
-            value="other"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Other
-          </TabsTrigger>
-        </TabsList>
+      {/* Asset Analytics */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Asset Distribution</CardTitle>
+            <CardDescription>Breakdown of your assets by category</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <AssetDistributionChart assets={assets} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Asset Growth</CardTitle>
+            <CardDescription>Value change over the last 6 months</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <AssetGrowthChart />
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value={activeTab} className="space-y-4">
+      {/* View Toggle */}
+      <div className="flex justify-between items-center">
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full md:w-auto grid-cols-4 h-auto md:h-10">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              All
+            </TabsTrigger>
+            <TabsTrigger
+              value="property"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              Property
+            </TabsTrigger>
+            <TabsTrigger
+              value="investment"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              Investments
+            </TabsTrigger>
+            <TabsTrigger
+              value="other"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              Other
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="flex gap-2">
+          <Button
+            variant={activeView === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveView("grid")}
+          >
+            Grid
+          </Button>
+          <Button
+            variant={activeView === "chart" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveView("chart")}
+          >
+            Charts
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4 mt-0">
+        {activeView === "grid" ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredAssets.map((asset) => (
               <AssetCard
@@ -103,8 +150,20 @@ export default function AssetsPage() {
               </div>
             </Card>
           </div>
-        </TabsContent>
-      </Tabs>
+        ) : (
+          <div className="grid gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Asset Value Comparison</CardTitle>
+                <CardDescription>Compare the value of your different assets</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[400px]">
+                <AssetDistributionChart assets={filteredAssets} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
 
       {/* Hidden button for programmatic triggering */}
       <Button id="add-asset-trigger" className="hidden">

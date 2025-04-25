@@ -28,8 +28,6 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { user, loginMutation, registerMutation } = useAuth();
-const loginLoading = loginMutation.isPending;
-const signupLoading = registerMutation.isPending;
   
   // Redirect if user is already logged in
   useEffect(() => {
@@ -309,8 +307,8 @@ const signupLoading = registerMutation.isPending;
                         </Label>
                       </div>
                       
-                      <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-                        {registerMutation.isPending ? (
+                      <Button type="submit" className="w-full" disabled={signupLoading}>
+                        {signupLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Creating account...

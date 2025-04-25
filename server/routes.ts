@@ -5,10 +5,9 @@ import path from "path";
 import fs from "fs";
 import connectDB from "./database";
 import { setupAuth } from "./auth";
-import { User, Asset, Liability, Expense } from "./models";
+import { User, Asset, Liability } from "./models";
 import assetsRouter from "./routes/assets";
 import liabilitiesRouter from "./routes/liabilities";
-import expensesRouter from "./routes/expenses";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -66,7 +65,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register specific route handlers
   app.use('/api/assets', assetsRouter);
   app.use('/api/liabilities', liabilitiesRouter);
-  app.use('/api/expenses', expensesRouter);
   
   // GET current user (added for the authenticated session)
   app.get("/api/user", (req, res) => {

@@ -24,8 +24,7 @@ import {
   Wrench,
   LogOut,
   User,
-  ChevronRight,
-  PlusCircle
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -131,14 +130,6 @@ export const Sidebar = () => {
               isActive={location === "/assets"}
             >
               Assets
-            </SidebarLink>
-
-            <SidebarLink 
-              href="/assets/add" 
-              icon={<PlusCircle className="h-4 w-4" />}
-              isActive={location === "/assets/add"}
-            >
-              Add Asset
             </SidebarLink>
             
             <SidebarLink 
