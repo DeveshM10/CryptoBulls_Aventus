@@ -11,8 +11,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ModeToggle } from "@/components/mode-toggle";
 import { User } from "lucide-react";
 
-export function DashboardPage() {
-  const [activeTab, setActiveTab] = useState("assets");
+export function DashboardPage({ initialTab = "assets" }: { initialTab?: string }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // Fetch the current user
   const { data: user } = useQuery({
