@@ -28,7 +28,7 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { user, loginMutation, registerMutation } = useAuth();
-  
+
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
@@ -93,7 +93,7 @@ export default function AuthPage() {
                 <TabsTrigger value="login">Sign In</TabsTrigger>
                 <TabsTrigger value="register">Create Account</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login">
                 <div className="space-y-6">
                   <div className="space-y-2 text-center">
@@ -121,7 +121,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={loginForm.control}
                         name="password"
@@ -156,7 +156,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <input 
@@ -170,9 +170,9 @@ export default function AuthPage() {
                           Forgot password?
                         </Link>
                       </div>
-                      
-                      <Button type="submit" className="w-full" disabled={loginLoading}>
-                        {loginLoading ? (
+
+                      <Button type="submit" className="w-full" disabled={loginMutation.isLoading}>
+                        {loginMutation.isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Signing in...
@@ -183,7 +183,7 @@ export default function AuthPage() {
                       </Button>
                     </form>
                   </Form>
-                  
+
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t"></div>
@@ -192,7 +192,7 @@ export default function AuthPage() {
                       <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col space-y-2">
                     <Button variant="outline" type="button" className="flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-google mr-2" viewBox="0 0 16 16">
@@ -207,7 +207,7 @@ export default function AuthPage() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="register">
                 <div className="space-y-6">
                   <div className="space-y-2 text-center">
@@ -235,7 +235,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                    
+
                       <FormField
                         control={signupForm.control}
                         name="email"
@@ -252,7 +252,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={signupForm.control}
                         name="password"
@@ -287,7 +287,7 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <div className="flex items-center space-x-2">
                         <input 
                           type="checkbox" 
@@ -306,9 +306,9 @@ export default function AuthPage() {
                           </Link>
                         </Label>
                       </div>
-                      
-                      <Button type="submit" className="w-full" disabled={signupLoading}>
-                        {signupLoading ? (
+
+                      <Button type="submit" className="w-full" disabled={registerMutation.isLoading}>
+                        {registerMutation.isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Creating account...
@@ -319,7 +319,7 @@ export default function AuthPage() {
                       </Button>
                     </form>
                   </Form>
-                  
+
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t"></div>
@@ -328,7 +328,7 @@ export default function AuthPage() {
                       <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col space-y-2">
                     <Button variant="outline" type="button" className="flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-google mr-2" viewBox="0 0 16 16">
@@ -347,7 +347,7 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Right Column - Hero Image/Info */}
       <div className="relative hidden md:flex md:w-1/2 flex-col items-center justify-center bg-muted p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/5" />
