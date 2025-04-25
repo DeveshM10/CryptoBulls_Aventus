@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 /* Custom scrollbar styles */
+.custom-scrollbar {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
