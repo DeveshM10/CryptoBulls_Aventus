@@ -1,7 +1,7 @@
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart3, LineChart, PieChart, RefreshCw, TrendingUp, Wallet, DollarSign, Target } from "lucide-react";
+import { BarChart3, LineChart, PieChart, RefreshCw, TrendingUp, Wallet, DollarSign, Target, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
