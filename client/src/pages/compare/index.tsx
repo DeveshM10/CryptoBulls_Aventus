@@ -75,6 +75,11 @@ export default function ComparePage() {
     setShowCharts(true);
   };
 
+  const debtToIncome = (benchmarkValues.liabilities / benchmarkValues.income) * 100;
+  const emergencyFundRatio = benchmarkValues.assets / (benchmarkValues.expenses * 12);
+  const savingsRate = ((benchmarkValues.income - benchmarkValues.expenses) / benchmarkValues.income) * 100;
+
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-3 md:px-6">
@@ -254,12 +259,12 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Debt-to-Income</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {((Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100).toFixed(1)}%
+                          {debtToIncome.toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: &lt;36%)</div>
                       </div>
-                      <div className={`text-xs ${(Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100 < 36 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {(Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100 < 36 ? 'Excellent' : 'Needs Improvement'}
+                      <div className={`text-xs ${debtToIncome < 36 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {debtToIncome < 36 ? 'Excellent' : 'Needs Improvement'}
                       </div>
                     </div>
 
@@ -267,12 +272,12 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Emergency Fund</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)).toFixed(1)}x
+                          {emergencyFundRatio.toFixed(1)}x
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: 3-6x)</div>
                       </div>
-                      <div className={`text-xs ${(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)) >= 3 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)) >= 3 ? 'Good' : 'Needs Improvement'}
+                      <div className={`text-xs ${emergencyFundRatio >= 3 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {emergencyFundRatio >= 3 ? 'Good' : 'Needs Improvement'}
                       </div>
                     </div>
 
@@ -280,12 +285,12 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Savings Rate</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100).toFixed(1)}%
+                          {savingsRate.toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: &gt;20%)</div>
                       </div>
-                      <div className={`text-xs ${((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100) >= 20 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {((Number(benchmarkValues.income) - Number(benchmarkValues.expenses)) / Number(benchmarkValues.income) * 100) >= 20 ? 'Excellent' : 'Almost There'}
+                      <div className={`text-xs ${savingsRate >= 20 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {savingsRate >= 20 ? 'Excellent' : 'Almost There'}
                       </div>
                     </div>
                   </div>
