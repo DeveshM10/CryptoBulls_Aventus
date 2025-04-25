@@ -115,7 +115,7 @@ export const Sidebar = () => {
 
         {/* Main Navigation */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <nav className="grid items-start px-2 py-2 text-sm font-medium gap-2">
+          <nav className="grid items-start px-2 py-2 text-sm font-medium gap-2 pb-4">
             <SidebarLink 
               href="/dashboard" 
               icon={<LayoutDashboard className="h-4 w-4" />}
