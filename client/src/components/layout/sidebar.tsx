@@ -67,7 +67,7 @@ export const Sidebar = () => {
   
   return (
     <aside className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 fixed h-full">
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-screen">
         {/* Top Section with Wallet and User Profile */}
         <div className="flex items-center justify-between px-4 py-4 border-b">
           <Link href="/" className="flex items-center gap-2">
