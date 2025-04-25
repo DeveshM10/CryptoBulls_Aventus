@@ -131,6 +131,14 @@ export const Sidebar = () => {
             >
               Assets
             </SidebarLink>
+
+            <SidebarLink 
+              href="/assets/add" 
+              icon={<PlusCircle className="h-4 w-4" />}
+              isActive={location === "/assets/add"}
+            >
+              Add Asset
+            </SidebarLink>
             
             <SidebarLink 
               href="/liabilities" 
