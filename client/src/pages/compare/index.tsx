@@ -1,11 +1,72 @@
+import { useState } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart3, LineChart, PieChart, RefreshCw, TrendingUp, Wallet, DollarSign, Target, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 export default function ComparePage() {
+  const [period, setPeriod] = useState("monthly");
+  const [compareType, setCompareType] = useState("industry");
+  const [userIncome, setUserIncome] = useState(50000);
+  const [userExpenses, setUserExpenses] = useState(30000);
+  const [userAssets, setUserAssets] = useState(500000);
+  const [userLiabilities, setUserLiabilities] = useState(200000);
+
+  // Dynamic data generation based on user input
+  const generatePerformanceData = () => {
+    const monthlyMultiplier = {
+      industry: 1.2,
+      peers: 1.1,
+      target: 1.3,
+      historical: 0.95
+    };
+
+    const multiplier = monthlyMultiplier[compareType];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+
+    return months.map((month, index) => ({
+      month,
+      userROI: (userIncome - userExpenses) / userAssets * 100,
+      benchmarkROI: ((userIncome - userExpenses) / userAssets * 100) * multiplier,
+      userGrowth: userAssets * (1 + 0.02 * index),
+      benchmarkGrowth: userAssets * (1 + 0.02 * index) * multiplier
+    }));
+  };
+
+  const generatePortfolioData = () => {
+    const benchmarkMultiplier = {
+      industry: 1.15,
+      peers: 1.05,
+      target: 1.25,
+      historical: 0.9
+    };
+
+    return {
+      user: {
+        assets: userAssets,
+        liabilities: userLiabilities,
+        netWorth: userAssets - userLiabilities
+      },
+      benchmark: {
+        assets: userAssets * benchmarkMultiplier[compareType],
+        liabilities: userLiabilities * 0.9,
+        netWorth: (userAssets * benchmarkMultiplier[compareType]) - (userLiabilities * 0.9)
+      }
+    };
+  };
+
+  const handleUpdate = () => {
+    // Trigger charts update
+    setUpdateCounter(prev => prev + 1);
+  };
+
+  const [updateCounter, setUpdateCounter] = useState(0);
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-3 md:px-6">
@@ -30,7 +91,7 @@ export default function ComparePage() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Financial Comparisons</h1>
             <div className="flex gap-2">
-              <Select defaultValue="monthly">
+              <Select value={period} onValueChange={setPeriod}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Select Period" />
                 </SelectTrigger>
@@ -41,7 +102,7 @@ export default function ComparePage() {
                   <SelectItem value="yearly">Yearly</SelectItem>
                 </SelectContent>
               </Select>
-              <Select defaultValue="industry">
+              <Select value={compareType} onValueChange={setCompareType}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Compare Against" />
                 </SelectTrigger>
@@ -52,18 +113,61 @@ export default function ComparePage() {
                   <SelectItem value="historical">Historical Data</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleUpdate}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
-              <Button variant="default" size="sm">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Generate Report
+                Update
               </Button>
             </div>
           </div>
 
-          <Tabs defaultValue="performance">
+          <Card className="p-4">
+            <CardHeader>
+              <CardTitle>Your Financial Data</CardTitle>
+              <CardDescription>Enter your financial information to compare</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="income">Monthly Income</Label>
+                  <Input
+                    id="income"
+                    type="number"
+                    value={userIncome}
+                    onChange={(e) => setUserIncome(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="expenses">Monthly Expenses</Label>
+                  <Input
+                    id="expenses"
+                    type="number"
+                    value={userExpenses}
+                    onChange={(e) => setUserExpenses(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="assets">Total Assets</Label>
+                  <Input
+                    id="assets"
+                    type="number"
+                    value={userAssets}
+                    onChange={(e) => setUserAssets(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="liabilities">Total Liabilities</Label>
+                  <Input
+                    id="liabilities"
+                    type="number"
+                    value={userLiabilities}
+                    onChange={(e) => setUserLiabilities(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Tabs defaultValue="performance" className="mt-4">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="performance">Performance</TabsTrigger>
               <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
@@ -76,22 +180,38 @@ export default function ComparePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Return on Investment</CardTitle>
-                    <CardDescription>Compare your ROI against market benchmarks</CardDescription>
+                    <CardDescription>Compare your ROI against {compareType} benchmarks</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[300px] flex items-center justify-center relative">
-                    <LineChart className="h-16 w-16 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground absolute">ROI comparison chart</p>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={generatePerformanceData()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="userROI" name="Your ROI" stroke="#8884d8" fill="#8884d8" />
+                        <Area type="monotone" dataKey="benchmarkROI" name="Benchmark ROI" stroke="#82ca9d" fill="#82ca9d" />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
                     <CardTitle>Growth Trajectory</CardTitle>
-                    <CardDescription>Your portfolio growth vs. target growth</CardDescription>
+                    <CardDescription>Your growth vs {compareType} growth</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[300px] flex items-center justify-center relative">
-                    <TrendingUp className="h-16 w-16 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground absolute">Growth trajectory chart</p>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={generatePerformanceData()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="userGrowth" name="Your Growth" stroke="#8884d8" fill="#8884d8" />
+                        <Area type="monotone" dataKey="benchmarkGrowth" name="Benchmark Growth" stroke="#82ca9d" fill="#82ca9d" />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </CardContent>
                 </Card>
               </div>
@@ -175,7 +295,6 @@ export default function ComparePage() {
               </div>
             </TabsContent>
           </Tabs>
-
           <Card className="col-span-full">
             <CardHeader>
               <CardTitle>Financial Health Score</CardTitle>
