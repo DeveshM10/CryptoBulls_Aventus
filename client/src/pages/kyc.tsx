@@ -28,8 +28,8 @@ export default function KycPage() {
         {/* Sidebar */}
         <Sidebar />
 
-        {/* Main content area */}
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+        {/* Main content area with padding for fixed sidebar */}
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
           <div className="grid gap-4">
             <div className="col-span-full">
               <h1 className="text-2xl font-bold mb-6">KYC Verification</h1>
