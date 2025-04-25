@@ -236,22 +236,22 @@ export default function AssetsPage() {
 
         {/* Main content area with padding for fixed sidebar */}
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
-          <div className="flex items-center justify-between overflow-x-auto py-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-x-auto py-2">
             <h1 className="text-2xl font-bold whitespace-nowrap">Assets</h1>
-            <div className="flex items-center gap-2 ml-4">
-              <Button variant="outline" size="sm">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="flex-shrink-0">
                 <Filter className="mr-2 h-4 w-4" />
-                Filter
+                <span className="whitespace-nowrap">Filter</span>
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="flex-shrink-0">
                 <Download className="mr-2 h-4 w-4" />
-                Export
+                <span className="whitespace-nowrap">Export</span>
               </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button className="flex-shrink-0 w-full sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Asset
+                    <span className="whitespace-nowrap">Add Asset</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[550px]">
