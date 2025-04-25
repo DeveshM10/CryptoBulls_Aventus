@@ -66,8 +66,8 @@ export const Sidebar = () => {
   const [location] = useLocation();
 
   return (
-    <aside className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 fixed h-full overflow-y-auto">
-      <div className="flex flex-col min-h-screen">
+    <aside className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72 fixed top-0 bottom-0 left-0 overflow-visible">
+      <div className="flex flex-col h-screen overflow-y-auto">
         {/* Top Section with Wallet and User Profile */}
         <div className="flex items-center justify-between px-4 py-4 border-b sticky top-0 bg-muted/40 z-10">
           <Link href="/" className="flex items-center gap-2">
@@ -114,8 +114,8 @@ export const Sidebar = () => {
         </div>
 
         {/* Main Navigation */}
-        <div className="py-2">
-          <nav className="grid items-start px-2 text-sm font-medium gap-2 pb-4">
+        <div className="py-2 flex-1 overflow-y-auto">
+          <nav className="grid items-start px-2 text-sm font-medium gap-2 pb-16">
             <SidebarLink 
               href="/dashboard" 
               icon={<LayoutDashboard className="h-4 w-4" />}
