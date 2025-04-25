@@ -1,10 +1,76 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, Plus, PieChart, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, Plus, PieChart, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { AddExpenseForm, Expense } from "@/components/budget/add-expense-form";
+import { BudgetChart } from "@/components/budget/budget-chart";
+import { SpendingCategoryChart } from "@/components/budget/spending-category-chart";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BudgetPage() {
+  const [budgetItems, setBudgetItems] = useState<Expense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const { toast } = useToast();
+
+  // Fetch budget items from API
+  const fetchBudgetItems = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      
+      const response = await fetch('/api/budget');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch budget items');
+      }
+      
+      const data = await response.json();
+      setBudgetItems(data);
+    } catch (error) {
+      console.error('Error fetching budget items:', error);
+      setIsError(true);
+      toast({
+        title: "Error",
+        description: "Failed to load budget data. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load budget items on component mount
+  useEffect(() => {
+    fetchBudgetItems();
+  }, []);
+
+  // Handle adding a new budget item
+  const handleAddBudgetItem = (newItem: Expense) => {
+    setBudgetItems((prevItems) => [...prevItems, newItem]);
+  };
+
+  // Helper to extract numeric value from formatted currency string
+  const extractNumericValue = (value: string): number => {
+    // Remove ₹ and commas, then parse as float
+    const numericString = value.replace(/[₹$,]/g, "");
+    return Number.parseFloat(numericString) || 0;
+  };
+
+  // Calculate totals
+  const totalBudgeted = budgetItems.reduce((total, item) => total + extractNumericValue(item.budgeted), 0);
+  const totalSpent = budgetItems.reduce((total, item) => total + extractNumericValue(item.spent), 0);
+  const totalRemaining = totalBudgeted - totalSpent;
+  const percentageUsed = totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
+  const percentageRemaining = 100 - percentageUsed;
+
+  // Format currency values
+  const formatCurrency = (value: number) => {
+    return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -36,10 +102,11 @@ export default function BudgetPage() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Monthly Budget</h1>
             <div className="flex gap-2">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Budget Item
+              <Button variant="outline" onClick={fetchBudgetItems} disabled={isLoading}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
               </Button>
+              <AddExpenseForm onAddExpense={handleAddBudgetItem} />
             </div>
           </div>
 
@@ -50,7 +117,7 @@ export default function BudgetPage() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$5,240.00</div>
+                <div className="text-2xl font-bold">{formatCurrency(totalBudgeted)}</div>
                 <div className="flex items-center space-x-2 text-xs mt-1">
                   <span className="text-muted-foreground">Monthly allocation</span>
                 </div>
@@ -63,10 +130,10 @@ export default function BudgetPage() {
                 <ArrowDownRight className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$3,185.25</div>
+                <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
                 <div className="flex items-center space-x-2 text-xs mt-1">
                   <div className="flex items-center text-green-500">
-                    <span>60.8% of budget used</span>
+                    <span>{percentageUsed}% of budget used</span>
                   </div>
                 </div>
               </CardContent>
@@ -78,10 +145,10 @@ export default function BudgetPage() {
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$2,054.75</div>
+                <div className="text-2xl font-bold">{formatCurrency(totalRemaining)}</div>
                 <div className="flex items-center space-x-2 text-xs mt-1">
                   <div className="flex items-center text-green-500">
-                    <span>39.2% of budget remaining</span>
+                    <span>{percentageRemaining}% of budget remaining</span>
                   </div>
                 </div>
               </CardContent>
@@ -89,97 +156,67 @@ export default function BudgetPage() {
           </div>
 
           <Card className="col-span-full">
-            <CardHeader>
-              <CardTitle>Budget Categories</CardTitle>
-              <CardDescription>Track your spending against your budget by category</CardDescription>
+            <CardHeader className="flex justify-between items-start">
+              <div>
+                <CardTitle>Budget Categories</CardTitle>
+                <CardDescription>Track your spending against your budget by category</CardDescription>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-8">
-                {/* Housing */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium">Housing</span>
-                    </div>
-                    <span className="text-sm font-medium">$1,200 / $1,500</span>
-                  </div>
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: "80%" }}></div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-muted-foreground">80% used</span>
-                    <span className="text-xs text-muted-foreground">$300 remaining</span>
-                  </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading budget items...</span>
                 </div>
-
-                {/* Groceries */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium">Groceries</span>
-                    </div>
-                    <span className="text-sm font-medium">$425 / $600</span>
-                  </div>
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: "70.8%" }}></div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-muted-foreground">70.8% used</span>
-                    <span className="text-xs text-muted-foreground">$175 remaining</span>
-                  </div>
+              ) : isError ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-muted-foreground">Failed to load budget data. Please try again.</p>
                 </div>
-
-                {/* Utilities */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium">Utilities</span>
-                    </div>
-                    <span className="text-sm font-medium">$310.25 / $350</span>
-                  </div>
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: "88.6%" }}></div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-muted-foreground">88.6% used</span>
-                    <span className="text-xs text-muted-foreground">$39.75 remaining</span>
-                  </div>
+              ) : budgetItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32">
+                  <p className="text-muted-foreground">No budget items found. Add your first budget item to get started.</p>
+                  <AddExpenseForm onAddExpense={handleAddBudgetItem} />
                 </div>
-
-                {/* Transportation */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium">Transportation</span>
-                    </div>
-                    <span className="text-sm font-medium">$285 / $400</span>
-                  </div>
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: "71.25%" }}></div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-muted-foreground">71.25% used</span>
-                    <span className="text-xs text-muted-foreground">$115 remaining</span>
-                  </div>
+              ) : (
+                <div className="space-y-8">
+                  {budgetItems.map((item) => {
+                    // Calculate amount remaining or overspent
+                    const budgetedAmount = extractNumericValue(item.budgeted);
+                    const spentAmount = extractNumericValue(item.spent);
+                    const remaining = budgetedAmount - spentAmount;
+                    const isOverBudget = remaining < 0;
+                    
+                    return (
+                      <div key={item.id}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <span className="font-medium">{item.title}</span>
+                          </div>
+                          <span className={`text-sm font-medium ${isOverBudget ? 'text-red-500' : ''}`}>
+                            {item.spent} / {item.budgeted}
+                          </span>
+                        </div>
+                        <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${isOverBudget ? 'bg-red-500' : 'bg-primary'}`} 
+                            style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className={`text-xs ${isOverBudget ? 'text-red-500' : 'text-muted-foreground'}`}>
+                            {item.percentage}% used
+                          </span>
+                          <span className={`text-xs ${isOverBudget ? 'text-red-500' : 'text-muted-foreground'}`}>
+                            {isOverBudget 
+                              ? `₹${Math.abs(remaining).toLocaleString("en-IN")} over budget` 
+                              : `₹${remaining.toLocaleString("en-IN")} remaining`}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                {/* Entertainment */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium">Entertainment</span>
-                    </div>
-                    <span className="text-sm font-medium text-red-500">$350 / $300</span>
-                  </div>
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
-                    <div className="bg-red-500 h-full rounded-full" style={{ width: "116.7%" }}></div>
-                  </div>
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-red-500">116.7% used</span>
-                    <span className="text-xs text-red-500">$50 over budget</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -189,19 +226,47 @@ export default function BudgetPage() {
                 <CardTitle>Spending by Category</CardTitle>
                 <CardDescription>Where your money is going this month</CardDescription>
               </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center relative">
-                <PieChart className="h-16 w-16 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground absolute">Spending by category chart will display here</p>
+              <CardContent className="h-[300px]">
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : isError ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">Failed to load chart data.</p>
+                  </div>
+                ) : budgetItems.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <PieChart className="h-16 w-16 text-muted-foreground/50" />
+                    <p className="text-sm text-muted-foreground absolute">Add budget items to see spending distribution</p>
+                  </div>
+                ) : (
+                  <SpendingCategoryChart expenses={budgetItems} />
+                )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Trend</CardTitle>
-                <CardDescription>Your spending patterns over the past 6 months</CardDescription>
+                <CardTitle>Budget vs. Spending</CardTitle>
+                <CardDescription>Comparison of budgeted amounts vs. actual spending</CardDescription>
               </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center">
-                <p className="text-sm text-muted-foreground">Monthly spending trend chart will display here</p>
+              <CardContent className="h-[300px]">
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : isError ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground">Failed to load chart data.</p>
+                  </div>
+                ) : budgetItems.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-muted-foreground">Add budget items to see comparison</p>
+                  </div>
+                ) : (
+                  <BudgetChart expenses={budgetItems} />
+                )}
               </CardContent>
             </Card>
           </div>
