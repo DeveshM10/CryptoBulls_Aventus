@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Web3Provider } from "@/components/wallet/web3-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 import Dashboard from "@/pages/dashboard";
 import KycPage from "@/pages/kyc";
 import NotFound from "@/pages/not-found";
@@ -23,18 +25,18 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/kyc" component={KycPage} />
-      <Route path="/assets" component={Dashboard} />
-      <Route path="/liabilities" component={LiabilitiesPage} />
-      <Route path="/credit-score" component={CreditScorePage} />
-      <Route path="/compare" component={ComparePage} />
-      <Route path="/budget" component={BudgetPage} />
-      <Route path="/learning-hub" component={LearningHubPage} />
-      <Route path="/tools" component={ToolsPage} />
-      <Route path="/blockchain" component={BlockchainPage} />
-      <Route path="/settings" component={SettingsPage} />
-      <Route path="/reports" component={ReportsPage} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
+      <ProtectedRoute path="/kyc" component={KycPage} />
+      <ProtectedRoute path="/assets" component={Dashboard} />
+      <ProtectedRoute path="/liabilities" component={LiabilitiesPage} />
+      <ProtectedRoute path="/credit-score" component={CreditScorePage} />
+      <ProtectedRoute path="/compare" component={ComparePage} />
+      <ProtectedRoute path="/budget" component={BudgetPage} />
+      <ProtectedRoute path="/learning-hub" component={LearningHubPage} />
+      <ProtectedRoute path="/tools" component={ToolsPage} />
+      <ProtectedRoute path="/blockchain" component={BlockchainPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
+      <ProtectedRoute path="/reports" component={ReportsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
@@ -45,10 +47,12 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="finvault-theme">
       <QueryClientProvider client={queryClient}>
-        <Web3Provider>
-          <Router />
-          <Toaster />
-        </Web3Provider>
+        <AuthProvider>
+          <Web3Provider>
+            <Router />
+            <Toaster />
+          </Web3Provider>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

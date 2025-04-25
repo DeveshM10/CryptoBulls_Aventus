@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,30 +10,37 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Eye, EyeOff, KeyRound, Loader2, Mail, User, Wallet } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 // Define schemas for validation
 const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
 const signupSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export default function AuthPage() {
   const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [signupLoading, setSignupLoading] = useState(false);
+  const { user, loginMutation, registerMutation } = useAuth();
+  
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   // Setup forms
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -41,7 +48,7 @@ export default function AuthPage() {
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
     },
@@ -49,23 +56,19 @@ export default function AuthPage() {
 
   // Handle form submissions
   const onLoginSubmit = (values: z.infer<typeof loginSchema>) => {
-    setLoginLoading(true);
-    // Simulate login API call
-    setTimeout(() => {
-      console.log('Login values:', values);
-      setLoginLoading(false);
-      navigate('/dashboard');
-    }, 1500);
+    loginMutation.mutate(values, {
+      onSuccess: () => {
+        navigate('/dashboard');
+      }
+    });
   };
 
   const onSignupSubmit = (values: z.infer<typeof signupSchema>) => {
-    setSignupLoading(true);
-    // Simulate signup API call
-    setTimeout(() => {
-      console.log('Signup values:', values);
-      setSignupLoading(false);
-      navigate('/dashboard');
-    }, 1500);
+    registerMutation.mutate(values, {
+      onSuccess: () => {
+        navigate('/dashboard');
+      }
+    });
   };
 
   return (
@@ -104,14 +107,14 @@ export default function AuthPage() {
                     <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                       <FormField
                         control={loginForm.control}
-                        name="email"
+                        name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>Username</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                <Input placeholder="email@example.com" className="pl-10" {...field} />
+                                <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                                <Input placeholder="your_username" className="pl-10" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -218,14 +221,14 @@ export default function AuthPage() {
                     <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
                       <FormField
                         control={signupForm.control}
-                        name="name"
+                        name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Full Name</FormLabel>
+                            <FormLabel>Username</FormLabel>
                             <FormControl>
                               <div className="relative">
                                 <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                <Input placeholder="John Doe" className="pl-10" {...field} />
+                                <Input placeholder="your_username" className="pl-10" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />

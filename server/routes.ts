@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
 import { 
@@ -10,8 +10,8 @@ import path from "path";
 import fs from "fs";
 import { eq, desc } from "drizzle-orm";
 import { ZodError } from "zod";
-import bcrypt from "bcryptjs";
 import connectDB from "./database";
+import { setupAuth } from "./auth";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -46,6 +46,14 @@ const upload = multer({
   },
 });
 
+// Authentication middleware
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Connect to database
   try {
@@ -55,90 +63,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error('Database connection error:', error);
   }
 
-  // Authentication routes
-  app.post("/api/register", async (req, res) => {
-    try {
-      // Validate request data
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if user already exists
-      const existingUser = await db.query.users.findFirst({
-        where: (users) => 
-          eq(users.username, userData.username) || eq(users.email, req.body.email)
-      });
-      
-      if (existingUser) {
-        return res.status(400).json({ message: "Username or email already exists" });
-      }
-      
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(userData.password, salt);
-      
-      // Create new user
-      const [newUser] = await db.insert(users)
-        .values({
-          ...userData,
-          password: hashedPassword
-        })
-        .returning({
-          id: users.id,
-          username: users.username,
-          email: users.email,
-          walletAddress: users.walletAddress,
-          kycVerified: users.kycVerified
-        });
-      
-      res.status(201).json(newUser);
-    } catch (error) {
-      console.error("Error registering user:", error);
-      
-      if (error instanceof ZodError) {
-        return res.status(400).json({ 
-          message: "Validation error", 
-          errors: error.errors 
-        });
-      }
-      
-      res.status(500).json({ message: "Server error" });
+  // Setup authentication
+  setupAuth(app);
+  
+  // GET current user (added for the authenticated session)
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
     }
+    
+    // Return user without password
+    const user = req.user as Express.User;
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   });
 
-  app.post("/api/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-      
-      // Find user by username or email
-      const user = await db.query.users.findFirst({
-        where: (users) => 
-          eq(users.username, username) || eq(users.email, username)
-      });
-      
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Compare passwords
-      const isMatch = await bcrypt.compare(password, user.password);
-      
-      if (!isMatch) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Return user without password
-      const { password: _, ...userResponse } = user;
-      res.status(200).json(userResponse);
-    } catch (error) {
-      console.error("Error logging in:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  app.get("/api/user/:id", async (req, res) => {
+  // Get user by ID
+  app.get("/api/users/:id", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -160,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Asset routes
-  app.get("/api/assets", async (req, res) => {
+  app.get("/api/assets", requireAuth, async (req, res) => {
     try {
       const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
       
@@ -183,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/assets", async (req, res) => {
+  app.post("/api/assets", requireAuth, async (req, res) => {
     try {
       const assetData = insertAssetSchema.parse(req.body);
       
