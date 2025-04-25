@@ -257,8 +257,8 @@ export default function ComparePage() {
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: &lt;36%)</div>
                       </div>
-                      <div className={`text-xs ${(Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100 < 36 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
-                        {(Number(benchmarkLiabilities) / Number(benchmarkIncome)) * 100 < 36 ? 'Excellent' : 'Needs Improvement'}
+                      <div className={`text-xs ${(Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100 < 36 ? 'text-green-500' : 'text-yellow-500'} mt-2`}>
+                        {(Number(benchmarkValues.liabilities) / Number(benchmarkValues.income)) * 100 < 36 ? 'Excellent' : 'Needs Improvement'}
                       </div>
                     </div>
 
