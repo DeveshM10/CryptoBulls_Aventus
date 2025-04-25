@@ -34,6 +34,22 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Sidebar link hover effect */
+[href].flex.items-center.gap-3.rounded-lg {
+  transition: all 0.3s ease;
+}
+
+[href].flex.items-center.gap-3.rounded-lg:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  transform: translateX(4px);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.2);
+}
+
+.dark [href].flex.items-center.gap-3.rounded-lg:hover {
+  background: rgba(var(--primary-rgb), 0.15);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.3);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
