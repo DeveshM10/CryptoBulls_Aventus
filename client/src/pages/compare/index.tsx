@@ -37,7 +37,8 @@ export default function ComparePage() {
     expenses: 4500,
     goals: 300000,
     liabilities: 50000,
-    income: 8000
+    income: 8000,
+    assets: 250000
   });
   const [showCharts, setShowCharts] = useState(false);
 
@@ -266,7 +267,7 @@ export default function ComparePage() {
                       <div className="text-sm font-medium mb-2">Emergency Fund</div>
                       <div className="flex items-end gap-2">
                         <div className="text-2xl font-bold">
-                          {(Number(benchmarkAssets) / (Number(benchmarkExpenses) * 12)).toFixed(1)}x
+                          {(Number(benchmarkValues.assets) / (Number(benchmarkValues.expenses) * 12)).toFixed(1)}x
                         </div>
                         <div className="text-sm text-muted-foreground">(Target: 3-6x)</div>
                       </div>
