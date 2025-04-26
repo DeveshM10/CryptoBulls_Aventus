@@ -128,7 +128,7 @@ const CourseCard = ({
     const newProgress = Math.min(100, moduleProgress + 25);
     setModuleProgress(newProgress);
     setCurrentModule(index + 1);
-    
+
     // Show completion toast
     if (newProgress === 100) {
       toast({
@@ -249,70 +249,74 @@ const CourseCard = ({
           </div>
         </CardFooter>
       </Card>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 mt-4">
-          <div className="aspect-video relative rounded-lg overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${image})` }}
-            />
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <PlayCircle className="h-12 w-12 text-white" />
-            </div>
-          </div>
-          
-          <div className="grid gap-4">
-            <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-2">Course Overview</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  <span>{modules} modules</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Video className="h-4 w-4 text-muted-foreground" />
-                  <span>{videos} videos</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{duration}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  <span>{level}</span>
-                </div>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="aspect-video relative rounded-lg overflow-hidden">
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${image})` }}
+              />
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <PlayCircle className="h-12 w-12 text-white" />
               </div>
             </div>
-            
-            <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-2">What You'll Learn</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Understanding core concepts and terminology</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Practical application through real-world examples</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Hands-on exercises and assessments</span>
-                </li>
-              </ul>
+
+            <div className="grid gap-4">
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-2">Course Overview</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <span>{modules} modules</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-muted-foreground" />
+                    <span>{videos} videos</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span>{duration}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    <span>{level}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-2">What You'll Learn</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Understanding core concepts and terminology</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Practical application through real-world examples</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Hands-on exercises and assessments</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={() => setDialogOpen(false)} variant="outline">Close</Button>
-          <Button>Start Learning</Button>
-        </DialogFooter>
-      </DialogContent>
+          <DialogFooter>
+            <Button onClick={() => setDialogOpen(false)} variant="outline">Close</Button>
+            <Button onClick={() => {
+              setDialogOpen(false);
+              setCurrentModule(0);
+              setIsOpen(true);
+            }}>Start Learning</Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </motion.div>
   );
@@ -837,8 +841,7 @@ export default function LearningHubPage() {
       author: "Priya Sharma"
     },
     {
-      title: "Building a Resilient Portfolio in Uncertain Times",
-      description: "How to create an investment strategy that can weather market volatility and economic downturns while protecting your assets.",
+      title: "Building a Resilient Portfolio in Uncertain Times",      description: "How to create an investment strategy that can weather market volatility and economic downturns while protecting your assets.",
       image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?q=80&w=250&auto=format&fit=crop",
       readTime: 10,
       author: "Robert Nelson"
