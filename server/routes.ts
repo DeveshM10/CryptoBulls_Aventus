@@ -10,6 +10,7 @@ import assetsRouter from "./routes/assets";
 import liabilitiesRouter from "./routes/liabilities";
 import budgetRouter from "./routes/budget";
 import { processVoiceInput } from "./api/voice-processor";
+import { generateReport } from "./api/report-generator";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -71,6 +72,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Voice processing endpoint
   app.post('/api/process-voice', requireAuth, processVoiceInput);
+  
+  // PDF Report generation endpoint
+  app.get('/api/generate-report', requireAuth, generateReport);
   
   // GET current user (added for the authenticated session)
   app.get("/api/user", (req, res) => {
