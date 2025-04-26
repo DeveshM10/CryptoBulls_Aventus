@@ -162,6 +162,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.patch("/api/user/:id", requireAuth, async (req, res) => {
+    try {
+      // Only allow users to update their own profile
+      if (req.user?._id.toString() !== req.params.id) {
+        return res.status(403).json({ error: "You can only update your own profile" });
+      }
+
+      const { username, email, fullName, walletAddress, address } = req.body;
+
+      // Check if username or email is already taken
+      if (username) {
+        const existingUser = await User.findOne({ 
+          username, 
+          _id: { $ne: req.params.id } 
+        });
+        
+        if (existingUser) {
+          return res.status(400).json({ error: "Username is already taken" });
+        }
+      }
+
+      if (email) {
+        const existingUser = await User.findOne({ 
+          email, 
+          _id: { $ne: req.params.id } 
+        });
+        
+        if (existingUser) {
+          return res.status(400).json({ error: "Email is already taken" });
+        }
+      }
+
+      // Update user profile
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+          username,
+          email,
+          fullName,
+          walletAddress,
+          address
+        },
+        { new: true }
+      ).select('-password');
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
