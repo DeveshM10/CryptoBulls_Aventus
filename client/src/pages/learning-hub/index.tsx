@@ -94,6 +94,7 @@ const CourseCard = ({
   badge,
   onClick 
 }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -146,7 +147,9 @@ const CourseCard = ({
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col overflow-hidden group cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Card className="h-full flex flex-col overflow-hidden group cursor-pointer">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
           <div 
@@ -246,6 +249,71 @@ const CourseCard = ({
           </div>
         </CardFooter>
       </Card>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          <div className="aspect-video relative rounded-lg overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${image})` }}
+            />
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <PlayCircle className="h-12 w-12 text-white" />
+            </div>
+          </div>
+          
+          <div className="grid gap-4">
+            <div className="border rounded-lg p-4">
+              <h3 className="font-medium mb-2">Course Overview</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <span>{modules} modules</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-muted-foreground" />
+                  <span>{videos} videos</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{duration}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  <span>{level}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border rounded-lg p-4">
+              <h3 className="font-medium mb-2">What You'll Learn</h3>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Understanding core concepts and terminology</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Practical application through real-world examples</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Hands-on exercises and assessments</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setDialogOpen(false)} variant="outline">Close</Button>
+          <Button>Start Learning</Button>
+        </DialogFooter>
+      </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
@@ -1062,6 +1130,16 @@ export default function LearningHubPage() {
                               videoId="pFgPNVytlwA"
                               title="The Simple Path to Wealth | JL Collins"
                               description="A straightforward approach to building wealth through index fund investing."
+                            />
+                            <VideoLesson 
+                              videoId="krRUOCyPiN4"
+                              title="Personal Finance Essentials"
+                              description="Master the fundamentals of personal finance and money management."
+                            />
+                            <VideoLesson 
+                              videoId="PHe0bXAIuk0"
+                              title="How The Economic Machine Works"
+                              description="Ray Dalio breaks down economic cycles and principles."
                             />
                           </div>
 
