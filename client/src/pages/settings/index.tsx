@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Sidebar } from "@/components/layout/sidebar";
 
 // Define schema for profile updates
 const profileSchema = z.object({
@@ -123,8 +124,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container max-w-6xl px-4 py-8">
-      <div className="flex flex-col gap-8">
+    <div className="flex min-h-[calc(100vh-73px)]">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Main content area with padding for fixed sidebar */}
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
@@ -546,7 +551,7 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 }
