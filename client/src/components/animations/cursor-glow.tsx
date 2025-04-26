@@ -1,51 +1,49 @@
-
-"use client"
-
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useState } from 'react';
 
 export function CursorGlow() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isVisible, setIsVisible] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-      setIsVisible(true)
-    }
+      setPosition({ x: e.clientX, y: e.clientY });
+      setIsVisible(true);
+    };
 
     const handleMouseLeave = () => {
-      setIsVisible(false)
-    }
+      setIsVisible(false);
+    };
 
     const handleMouseEnter = () => {
-      setIsVisible(true)
-    }
+      setIsVisible(true);
+    };
 
-    window.addEventListener("mousemove", updateMousePosition)
-    document.addEventListener("mouseleave", handleMouseLeave)
-    document.addEventListener("mouseenter", handleMouseEnter)
+    window.addEventListener('mousemove', updateMousePosition);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseenter', handleMouseEnter);
 
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition)
-      document.removeEventListener("mouseleave", handleMouseLeave)
-      document.removeEventListener("mouseenter", handleMouseEnter)
-    }
-  }, [])
+      window.removeEventListener('mousemove', updateMousePosition);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, []);
+
+  if (!isVisible) return null;
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 w-[150px] h-[150px] rounded-full pointer-events-none z-50 mix-blend-screen"
-      animate={{
-        x: mousePosition.x - 75,
-        y: mousePosition.y - 75,
-        opacity: isVisible ? 1 : 0,
-      }}
-      transition={{ type: "spring", damping: 20, stiffness: 300, mass: 0.5 }}
+    <div 
+      className="pointer-events-none fixed inset-0 z-30 opacity-70 transition-opacity duration-300"
       style={{
-        background: "radial-gradient(circle, rgba(124, 58, 237, 0.6) 0%, rgba(139, 92, 246, 0.3) 40%, transparent 70%)",
-        filter: "blur(10px)",
+        background: `
+          radial-gradient(
+            600px circle at ${position.x}px ${position.y}px,
+            rgba(124, 58, 237, 0.15),
+            rgba(139, 92, 246, 0.05),
+            transparent 70%
+          )
+        `,
       }}
     />
-  )
+  );
 }
