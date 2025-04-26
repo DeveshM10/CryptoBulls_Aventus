@@ -21,6 +21,7 @@ import SettingsPage from "@/pages/settings";
 import LandingPage from "@/pages/landing";
 import AuthPage from "@/pages/auth";
 import AssetsPage from "@/pages/assets";
+import PortfolioPage from "@/pages/portfolio";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <ProtectedRoute path="/kyc" component={KycPage} />
       <ProtectedRoute path="/assets" component={AssetsPage} />
       <ProtectedRoute path="/liabilities" component={LiabilitiesPage} />
+      <ProtectedRoute path="/portfolio" component={PortfolioPage} />
       <ProtectedRoute path="/credit-score" component={CreditScorePage} />
       <ProtectedRoute path="/compare" component={ComparePage} />
       <ProtectedRoute path="/budget" component={BudgetPage} />

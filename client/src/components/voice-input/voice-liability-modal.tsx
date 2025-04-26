@@ -1,21 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Mic } from "lucide-react"
-import { VoiceProcessor } from "./voice-processor"
-import { AddLiabilityForm } from "../forms/add-liability-form"
-import { Liability } from "@shared/schema"
 import { useToast } from "@/hooks/use-toast"
+import { Mic, Loader2 } from "lucide-react"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { VoiceProcessor } from "./voice-processor"
+import { Liability } from "@shared/schema"
+import { apiRequest } from "@/lib/queryClient"
+import { v4 as uuidv4 } from "uuid"
 
 interface VoiceLiabilityModalProps {
   onAddLiability: (liability: Liability) => void
@@ -23,87 +18,192 @@ interface VoiceLiabilityModalProps {
 
 export function VoiceLiabilityModal({ onAddLiability }: VoiceLiabilityModalProps) {
   const [open, setOpen] = useState(false)
-  const [liabilityData, setLiabilityData] = useState<Partial<Liability> | null>(null)
+  const [isListening, setIsListening] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [extractedData, setExtractedData] = useState<Partial<Liability> | null>(null)
   const { toast } = useToast()
 
-  const handleDataExtracted = (data: Partial<Liability>) => {
-    // Handle the extracted data from the voice processor
-    setLiabilityData(data)
-    
-    toast({
-      title: "Liability data extracted",
-      description: "Please review and submit the form to add this liability.",
-    })
+  const handleStartListening = () => {
+    setIsListening(true)
+    setError(null)
+    setExtractedData(null)
   }
 
-  const handleFormSubmit = (formData: Liability) => {
-    // When the liability form is submitted
-    onAddLiability(formData)
-    setOpen(false)
-    setLiabilityData(null)
+  const handleStopListening = () => {
+    setIsListening(false)
+  }
+
+  const handleVoiceData = (data: Partial<Liability>) => {
+    console.log("Extracted liability data:", data)
+    setExtractedData(data)
+    setIsProcessing(false)
+  }
+
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage)
+    setIsListening(false)
+    setIsProcessing(false)
+  }
+
+  const handleConfirmAdd = async () => {
+    if (!extractedData) return
     
-    toast({
-      title: "Liability added successfully",
-      description: "Your liability has been added to your account.",
-    })
+    try {
+      setIsProcessing(true)
+      
+      // Create the complete liability object with the extracted data
+      const liabilityData: Liability = {
+        id: uuidv4(),
+        title: extractedData.title || "Unnamed Liability",
+        amount: extractedData.amount || "₹0",
+        type: extractedData.type || "other",
+        interest: extractedData.interest || "0%",
+        payment: extractedData.payment || "₹0",
+        dueDate: extractedData.dueDate || new Date().toISOString().split('T')[0],
+        status: (extractedData.status as "current" | "warning" | "late") || "current",
+      }
+      
+      // Call the API to add the liability
+      const response = await apiRequest("POST", "/api/liabilities", liabilityData)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add liability: ${response.statusText}`)
+      }
+      
+      // Pass the new liability to the parent component
+      onAddLiability(liabilityData)
+      
+      toast({
+        title: "Liability Added",
+        description: "Your liability has been successfully added via voice input.",
+      })
+      
+      // Close the modal and reset states
+      setOpen(false)
+      setExtractedData(null)
+      setIsProcessing(false)
+    } catch (error) {
+      console.error("Error adding liability:", error)
+      setError(error instanceof Error ? error.message : "Failed to add liability")
+      setIsProcessing(false)
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Mic className="h-4 w-4" />
-          Add Liability with Voice
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader>
-          <DialogTitle>Add Liability with Voice</DialogTitle>
-          <DialogDescription>
-            Use your voice to easily add a new liability to your account.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="grid gap-6 py-4">
-          {!liabilityData ? (
-            <VoiceProcessor type="liability" onDataExtracted={handleDataExtracted} />
-          ) : (
-            <div className="space-y-4">
-              <div className="rounded-md bg-muted p-4">
-                <h3 className="text-sm font-medium mb-2">We extracted the following information:</h3>
-                <ul className="text-sm space-y-1">
-                  {liabilityData.title && <li><strong>Title:</strong> {liabilityData.title}</li>}
-                  {liabilityData.amount && <li><strong>Amount:</strong> {liabilityData.amount}</li>}
-                  {liabilityData.type && <li><strong>Type:</strong> {liabilityData.type}</li>}
-                  {liabilityData.interest && <li><strong>Interest Rate:</strong> {liabilityData.interest}</li>}
-                  {liabilityData.payment && <li><strong>Payment:</strong> {liabilityData.payment}</li>}
-                </ul>
-              </div>
-              
-              <div className="border rounded-md p-4">
-                <h3 className="text-sm font-medium mb-4">Review and complete liability details</h3>
-                <AddLiabilityForm 
-                  initialData={liabilityData} 
-                  onAddLiability={handleFormSubmit}
-                  submitLabel="Add Liability"
-                />
-              </div>
-            </div>
+    <>
+      <Button 
+        variant="outline" 
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2"
+      >
+        <Mic className="h-4 w-4" />
+        Voice Input
+      </Button>
+      
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Liability Using Voice</DialogTitle>
+            <DialogDescription>
+              Click the microphone and describe your liability. For example, "I have a home loan with interest rate of 7.5 percent and monthly payment of ten thousand rupees."
+            </DialogDescription>
+          </DialogHeader>
+          
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => {
-            if (liabilityData) {
-              setLiabilityData(null)
-            } else {
-              setOpen(false)
-            }
-          }}>
-            {liabilityData ? "Back to Voice Input" : "Cancel"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          
+          <div className="flex flex-col gap-4 py-4">
+            {isListening && (
+              <div className="flex flex-col items-center justify-center gap-2 py-4">
+                <div className="relative">
+                  <Mic className="h-12 w-12 text-primary animate-pulse" />
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                </div>
+                <p className="text-center text-sm text-muted-foreground">
+                  Listening... Speak clearly and describe your liability.
+                </p>
+              </div>
+            )}
+            
+            {!isListening && !extractedData && !isProcessing && (
+              <Button onClick={handleStartListening} className="mx-auto">
+                <Mic className="mr-2 h-4 w-4" />
+                Start Speaking
+              </Button>
+            )}
+            
+            {isProcessing && (
+              <div className="flex flex-col items-center justify-center gap-2 py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-center text-sm text-muted-foreground">
+                  Processing your speech...
+                </p>
+              </div>
+            )}
+            
+            {extractedData && !isProcessing && (
+              <div className="space-y-4">
+                <h3 className="font-medium">Extracted Liability Information:</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Title:</span>
+                    <span className="font-medium">{extractedData.title || "Not detected"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Amount:</span>
+                    <span className="font-medium">{extractedData.amount || "Not detected"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Type:</span>
+                    <span className="font-medium">{extractedData.type || "Not detected"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Interest:</span>
+                    <span className="font-medium">{extractedData.interest || "Not detected"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Payment:</span>
+                    <span className="font-medium">{extractedData.payment || "Not detected"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Due Date:</span>
+                    <span className="font-medium">{extractedData.dueDate || "Not detected"}</span>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setExtractedData(null)}>
+                    Try Again
+                  </Button>
+                  <Button onClick={handleConfirmAdd}>
+                    Confirm & Add
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Hidden component for processing speech */}
+          {isListening && (
+            <VoiceProcessor
+              isListening={isListening}
+              onVoiceData={handleVoiceData}
+              onError={handleError}
+              onStopListening={handleStopListening}
+              processingType="liability"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

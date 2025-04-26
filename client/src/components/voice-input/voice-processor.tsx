@@ -1,222 +1,147 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Mic, MicOff, Loader2, Sparkles } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState, useEffect, useCallback } from "react"
 import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
 
+// Define interface for the Voice processor component
 interface VoiceProcessorProps {
-  type: 'asset' | 'liability'
-  onDataExtracted: (data: any) => void
+  isListening: boolean
+  onVoiceData: (data: any) => void
+  onError: (error: string) => void
+  onStopListening: () => void
+  processingType: 'asset' | 'liability'
 }
 
-export function VoiceProcessor({ type, onDataExtracted }: VoiceProcessorProps) {
-  const [isListening, setIsListening] = useState(false)
+// Define the SpeechRecognition type to avoid TypeScript errors
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onerror: (event: any) => void
+  onresult: (event: any) => void
+  onend: (event: any) => void
+}
+
+export function VoiceProcessor({
+  isListening,
+  onVoiceData,
+  onError,
+  onStopListening,
+  processingType
+}: VoiceProcessorProps) {
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
   const [transcript, setTranscript] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [recognitionInstance, setRecognitionInstance] = useState<any>(null)
   const { toast } = useToast()
 
-  // Setup speech recognition
+  // Create and initialize the SpeechRecognition object
   useEffect(() => {
-    // Check if browser supports SpeechRecognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    
-    if (!SpeechRecognition) {
-      setError("Your browser doesn't support speech recognition. Please try Chrome, Edge, or Safari.")
-      return
-    }
-    
-    // Create a new recognition instance
-    const recognition = new SpeechRecognition()
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = 'en-US'
-    
-    recognition.onresult = (event: any) => {
-      const result = event.results[event.results.length - 1]
-      const transcript = result[0].transcript
-      setTranscript(transcript)
-    }
-    
-    recognition.onerror = (event: any) => {
-      console.error("Recognition error:", event.error)
-      setError(`Recognition error: ${event.error}`)
-      setIsListening(false)
-    }
-    
-    recognition.onend = () => {
-      if (isListening) {
-        recognition.start()
+    if (typeof window !== "undefined") {
+      // Use type assertion for WebSpeechAPI compatibility
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      if (SpeechRecognition) {
+        const recognitionInstance = new SpeechRecognition() as SpeechRecognition
+        recognitionInstance.continuous = true
+        recognitionInstance.interimResults = true
+        recognitionInstance.lang = "en-US"
+        setRecognition(recognitionInstance)
+      } else {
+        toast({
+          title: "Speech Recognition Not Supported",
+          description: "Your browser does not support speech recognition. Please try a different browser.",
+          variant: "destructive",
+        })
+        onError("Speech recognition not supported")
       }
     }
-    
-    setRecognitionInstance(recognition)
-    
+
+    // Cleanup
     return () => {
       if (recognition) {
-        recognition.stop()
+        recognition.abort()
       }
     }
-  }, [isListening])
+  }, [])
 
-  // Toggle listening state
-  const toggleListening = () => {
-    if (!recognitionInstance) return
-    
-    if (isListening) {
-      recognitionInstance.stop()
-      setIsListening(false)
-    } else {
-      setTranscript("")
-      setError(null)
-      recognitionInstance.start()
-      setIsListening(true)
-    }
-  }
-
-  // Process the transcript with AI
-  const processTranscript = async () => {
-    if (!transcript.trim()) {
-      toast({
-        title: "No speech detected",
-        description: "Please record some speech first before processing.",
-        variant: "destructive"
-      })
-      return
-    }
-    
+  // Process the voice input using Google Gemini API
+  const processVoiceInput = useCallback(async (text: string) => {
     try {
-      setIsProcessing(true)
-      
       const response = await apiRequest("POST", "/api/process-voice", {
-        text: transcript,
-        type: type
+        text: text,
+        type: processingType
       })
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to process voice input")
+        throw new Error(`Failed to process voice input: ${response.statusText}`)
       }
       
       const data = await response.json()
-      
-      if (data.error) {
-        throw new Error(data.error)
-      }
-      
-      // Success! Pass the extracted data up
-      toast({
-        title: "Successfully extracted data",
-        description: `Your ${type} information has been processed successfully.`,
-        variant: "default"
-      })
-      
-      onDataExtracted(data)
-      setTranscript("")
-    } catch (err: any) {
-      console.error("Error processing transcript:", err)
-      toast({
-        title: "Error processing input",
-        description: err.message || "There was a problem processing your voice input.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsProcessing(false)
+      onVoiceData(data)
+    } catch (error) {
+      console.error("Error processing voice input:", error)
+      onError(error instanceof Error ? error.message : "Failed to process voice input")
     }
-  }
+  }, [onVoiceData, onError, processingType])
 
-  // Clear the transcript
-  const clearTranscript = () => {
-    setTranscript("")
-  }
+  // Start or stop listening based on isListening prop
+  useEffect(() => {
+    if (!recognition) return
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Voice Input for {type === 'asset' ? 'Asset' : 'Liability'}</CardTitle>
-        <CardDescription>
-          Speak about your {type === 'asset' ? 'asset' : 'liability'} details and we'll extract the information automatically
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+    if (isListening) {
+      try {
+        recognition.start()
+        setTranscript("")
+      } catch (error) {
+        console.error("Error starting speech recognition:", error)
+      }
+    } else if (recognition) {
+      try {
+        recognition.stop()
+      } catch (error) {
+        console.error("Error stopping speech recognition:", error)
+      }
+    }
+  }, [isListening, recognition])
 
-        <div className="flex items-center gap-2 mb-2">
-          <Badge variant={isListening ? "default" : "outline"} className="animate-pulse">
-            {isListening ? "Listening..." : "Not listening"}
-          </Badge>
-          {type === 'asset' && <Badge variant="secondary">Asset Mode</Badge>}
-          {type === 'liability' && <Badge variant="secondary">Liability Mode</Badge>}
-        </div>
+  // Set up recognition event handlers
+  useEffect(() => {
+    if (!recognition) return
 
-        <ScrollArea className="h-[120px] w-full border rounded-md p-4 bg-muted/20">
-          {transcript ? (
-            <p className="text-sm">{transcript}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {isListening 
-                ? "Start speaking about your " + (type === 'asset' ? 'asset' : 'liability') + "..." 
-                : "Click the microphone button to start recording"}
-            </p>
-          )}
-        </ScrollArea>
+    // Handle speech recognition results
+    recognition.onresult = (event: any) => {
+      let interimTranscript = ''
+      let finalTranscript = ''
 
-        <div className="pt-2">
-          <p className="text-xs text-muted-foreground mb-2">
-            {type === 'asset' 
-              ? "Example: \"I bought 10 shares of Apple stock worth ₹15,000 yesterday as a long-term investment.\"" 
-              : "Example: \"I have a home loan of ₹25,00,000 at 7.5% interest rate with a monthly payment of ₹18,500.\""}
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex gap-2">
-          <Button 
-            variant={isListening ? "destructive" : "default"}
-            onClick={toggleListening}
-            disabled={isProcessing}
-          >
-            {isListening ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
-            {isListening ? "Stop" : "Start Recording"}
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={clearTranscript}
-            disabled={isProcessing || !transcript}
-          >
-            Clear
-          </Button>
-        </div>
-        <Button 
-          onClick={processTranscript}
-          disabled={isProcessing || !transcript}
-          variant="default"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Process with AI
-            </>
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
-  )
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript
+        } else {
+          interimTranscript += transcript
+        }
+      }
+
+      setTranscript(finalTranscript || interimTranscript)
+    }
+
+    // Handle speech recognition errors
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error)
+      onError(`Speech recognition error: ${event.error}`)
+      onStopListening()
+    }
+
+    // Handle speech recognition end
+    recognition.onend = () => {
+      if (transcript) {
+        processVoiceInput(transcript)
+      }
+      onStopListening()
+    }
+  }, [recognition, transcript, onStopListening, onError, processVoiceInput])
+
+  return null // This component doesn't render anything, it just processes speech
 }
