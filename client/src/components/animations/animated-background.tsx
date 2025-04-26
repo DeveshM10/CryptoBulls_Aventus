@@ -138,3 +138,69 @@ export function AnimatedBackground() {
     />
   );
 }
+import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+
+interface Cube {
+  x: number;
+  y: number;
+  z: number;
+  rotateX: number;
+  rotateY: number;
+  rotateZ: number;
+  size: number;
+  color: string;
+}
+
+export function AnimatedBackground() {
+  return (
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+      <div className="relative w-full h-full">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <FloatingCube key={i} delay={i * 0.2} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FloatingCube({ delay }: { delay: number }) {
+  const randomSize = Math.random() * 60 + 40;
+  const randomX = Math.random() * 100;
+  const randomY = Math.random() * 100;
+  
+  return (
+    <motion.div
+      className="absolute"
+      style={{
+        left: `${randomX}%`,
+        top: `${randomY}%`,
+        width: randomSize,
+        height: randomSize,
+      }}
+      initial={{
+        opacity: 0,
+        scale: 0,
+        rotateX: 0,
+        rotateY: 0,
+        rotateZ: 0,
+      }}
+      animate={{
+        opacity: [0.1, 0.3, 0.1],
+        scale: [1, 1.2, 1],
+        rotateX: [0, 360],
+        rotateY: [0, 360],
+        rotateZ: [0, 360],
+        z: [0, 50, 0],
+      }}
+      transition={{
+        duration: 20,
+        delay,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    >
+      <div className="w-full h-full rounded-xl bg-gradient-to-br from-primary/5 to-primary/20 backdrop-blur-3xl" />
+    </motion.div>
+  );
+}

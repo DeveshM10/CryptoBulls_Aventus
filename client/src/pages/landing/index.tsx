@@ -382,47 +382,49 @@ export default function LandingPage() {
           </div>
           
           <div className="mx-auto grid gap-6 py-12 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
-            <FeatureCard 
-              icon={<Wallet className="h-10 w-10 text-primary" />}
-              title="Asset Management"
-              description="Track all your traditional and crypto assets in a unified dashboard with real-time updates."
-              delay={0.2}
-            />
-            
-            <FeatureCard 
-              icon={<Shield className="h-10 w-10 text-primary" />}
-              title="Blockchain Security"
-              description="Benefit from immutable transaction records and enhanced security through blockchain technology."
-              delay={0.3}
-            />
-            
-            <FeatureCard 
-              icon={<BarChart3 className="h-10 w-10 text-primary" />}
-              title="Advanced Analytics"
-              description="Gain insights into your financial health with comprehensive reports and predictive analytics."
-              delay={0.4}
-            />
-            
-            <FeatureCard 
-              icon={<Coins className="h-10 w-10 text-primary" />}
-              title="Smart Budgeting"
-              description="Create intelligent budgets that adapt to your spending habits and financial goals."
-              delay={0.5}
-            />
-            
-            <FeatureCard 
-              icon={<CreditCard className="h-10 w-10 text-primary" />}
-              title="Expense Tracking"
-              description="Automatically categorize and monitor your expenses with AI-powered insights."
-              delay={0.6}
-            />
-            
-            <FeatureCard 
-              icon={<Rocket className="h-10 w-10 text-primary" />}
-              title="Goal Planning"
-              description="Set and track your financial goals with customized strategies and timelines."
-              delay={0.7}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto px-4">
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><Wallet className="h-8 w-8 text-primary" /></div>}
+                title="Asset Management"
+                description="Track all your traditional and crypto assets in a unified dashboard with real-time updates."
+                delay={0.2}
+              />
+              
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><Shield className="h-8 w-8 text-primary" /></div>}
+                title="Blockchain Security"
+                description="Benefit from immutable transaction records and enhanced security through blockchain technology."
+                delay={0.3}
+              />
+              
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><BarChart3 className="h-8 w-8 text-primary" /></div>}
+                title="Advanced Analytics"
+                description="Gain insights into your financial health with comprehensive reports and predictive analytics."
+                delay={0.4}
+              />
+              
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><Coins className="h-8 w-8 text-primary" /></div>}
+                title="Smart Budgeting"
+                description="Create intelligent budgets that adapt to your spending habits and financial goals."
+                delay={0.5}
+              />
+              
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><CreditCard className="h-8 w-8 text-primary" /></div>}
+                title="Expense Tracking"
+                description="Automatically categorize and monitor your expenses with AI-powered insights."
+                delay={0.6}
+              />
+              
+              <FeatureCard 
+                icon={<div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10"><Rocket className="h-8 w-8 text-primary" /></div>}
+                title="Goal Planning"
+                description="Set and track your financial goals with customized strategies and timelines."
+                delay={0.7}
+              />
+            </div>
           </div>
           
           <motion.div 
