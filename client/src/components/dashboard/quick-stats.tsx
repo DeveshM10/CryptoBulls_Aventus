@@ -93,18 +93,43 @@ export function QuickStats() {
     }
   };
 
-  // Calculate total income
+  // Calculate total income including asset profits
   const calculateTotalIncome = () => {
     try {
+      // Calculate regular income from budget items
       const incomeCategories = ['income', 'salary', 'deposit', 'investment return'];
-      
-      return budgetItems.reduce((sum: number, item: any) => {
+      const budgetIncome = budgetItems.reduce((sum: number, item: any) => {
         try {
-          // Check if this is an income item
           const isIncome = incomeCategories.some(category => 
             item.title?.toLowerCase().includes(category) || 
             (item.status?.toLowerCase() === 'income')
           );
+
+          if (!isIncome) return sum;
+
+          let amount = parseFloat(item.budgeted?.replace(/[^0-9.-]/g, '') || '0');
+          return isNaN(amount) ? sum : sum + amount;
+        } catch (err) {
+          console.error("Error parsing income item:", item, err);
+          return sum;
+        }
+      }, 0);
+
+      // Calculate income from asset profits
+      const assetProfits = assets.reduce((sum: number, asset: any) => {
+        try {
+          const currentValue = parseFloat(asset.value.replace(/[^0-9.-]/g, '') || '0');
+          const changePercent = parseFloat(asset.change.replace(/[^0-9.-]/g, '') || '0') / 100;
+          const originalValue = currentValue / (1 + changePercent);
+          const profit = asset.trend === 'up' ? currentValue - originalValue : 0;
+          return isNaN(profit) ? sum : sum + profit;
+        } catch (err) {
+          console.error("Error calculating asset profit:", asset, err);
+          return sum;
+        }
+      }, 0);
+
+      return budgetIncome + assetProfits;
           
           if (!isIncome) return sum;
           
