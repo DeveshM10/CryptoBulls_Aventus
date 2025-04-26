@@ -90,15 +90,60 @@ const CourseCard = ({
   duration, 
   progress, 
   level, 
-  badge, 
+  badge,
   onClick 
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentModule, setCurrentModule] = useState(0);
+  const [moduleProgress, setModuleProgress] = useState(progress);
+
+  const moduleSteps = [
+    {
+      title: "Introduction",
+      content: "Basic concepts and terminology",
+      completed: false
+    },
+    {
+      title: "Core Concepts",
+      content: "Deep dive into fundamentals",
+      completed: false
+    },
+    {
+      title: "Practical Application",
+      content: "Hands-on exercises and examples",
+      completed: false
+    },
+    {
+      title: "Assessment",
+      content: "Quiz and final evaluation",
+      completed: false
+    }
+  ];
+
+  const completeModule = (index) => {
+    const newProgress = Math.min(100, moduleProgress + 25);
+    setModuleProgress(newProgress);
+    setCurrentModule(index + 1);
+    
+    // Show completion toast
+    if (newProgress === 100) {
+      toast({
+        title: "Course Completed! 🎉",
+        description: "Congratulations on finishing the course!",
+      });
+    } else {
+      toast({
+        title: "Module Completed!",
+        description: `Progress: ${newProgress}%`,
+      });
+    }
+  };
   return (
     <motion.div
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col overflow-hidden group cursor-pointer" onClick={onClick}>
+      <Card className="h-full flex flex-col overflow-hidden group cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
           <div 
@@ -148,6 +193,39 @@ const CourseCard = ({
           </div>
         </CardContent>
 
+        {isOpen && (
+          <div className="px-6 pb-4">
+            <div className="space-y-4">
+              {moduleSteps.map((module, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="font-medium">{module.title}</h4>
+                      <p className="text-sm text-muted-foreground">{module.content}</p>
+                    </div>
+                    {index <= currentModule && (
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          completeModule(index);
+                        }}
+                        disabled={index < currentModule}
+                      >
+                        {index < currentModule ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          "Start"
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <CardFooter className="border-t pt-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
@@ -171,16 +249,34 @@ const CourseCard = ({
 
 // Video component with embedded YouTube player
 const VideoLesson = ({ videoId, title, description }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
   return (
     <div className="space-y-4">
-      <div className="aspect-video bg-muted overflow-hidden rounded-lg">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title={title}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
+      <div className="aspect-video bg-muted overflow-hidden rounded-lg relative">
+        {!isPlaying ? (
+          <div 
+            className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+            onClick={() => setIsPlaying(true)}
+            style={{
+              backgroundImage: `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div className="bg-black/50 rounded-full p-4 transform transition-transform group-hover:scale-110">
+              <PlayCircle className="h-12 w-12 text-white" />
+            </div>
+          </div>
+        ) : (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            title={title}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        )}
       </div>
       <div>
         <h3 className="text-lg font-medium">{title}</h3>
