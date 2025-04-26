@@ -295,7 +295,7 @@ export function FinancialTips() {
                 <div className={`rounded-full p-1.5 ${tip.color} bg-white`}>
                   {tip.icon}
                 </div>
-                <p className="text-sm flex-1">{tip.text}</p>
+                <p className="text-sm flex-1 text-black font-medium">{tip.text}</p>
               </div>
             ))
           )}
