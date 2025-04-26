@@ -14,12 +14,6 @@ export default function Dashboard() {
             </svg>
             <span className="font-bold">FinVault</span>
           </a>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a className="font-medium transition-colors hover:text-primary" href="/">Dashboard</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/transactions">Transactions</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/budget">Budget</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/goals">Goals</a>
-          </nav>
         </div>
       </header>
 

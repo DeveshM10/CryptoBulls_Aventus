@@ -107,7 +107,16 @@ export const Sidebar = () => {
         </div>
 
         {/* Wallet Connection Section */}
-        <div className="flex items-center justify-between px-4 py-4 sticky top-[73px] bg-muted/40 z-10">
+        <div className="flex flex-col gap-4 px-4 py-4 sticky top-[73px] bg-muted/40 z-10">
+          {/* FinVault Logo - Added above Wallet Connect */}
+          <Link href="/" className="flex items-center justify-center gap-2 bg-primary/10 p-3 rounded-lg w-full transition-colors hover:bg-primary/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span className="font-bold text-lg">FinVault</span>
+          </Link>
+
           <div className="w-full">
             <WalletConnect />
           </div>

@@ -87,7 +87,7 @@ export function DashboardPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$125,800.32</div>
+                <div className="text-2xl font-bold">₹125,800.32</div>
                 <p className="text-xs text-muted-foreground">
                   +8.1% <span className="ml-1">from last month</span>
                 </p>
@@ -102,7 +102,7 @@ export function DashboardPage() {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$8,450.00</div>
+                <div className="text-2xl font-bold">₹8,450.00</div>
                 <p className="text-xs text-muted-foreground">
                   +2.3% <span className="ml-1">from last month</span>
                 </p>
@@ -117,7 +117,7 @@ export function DashboardPage() {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$3,280.75</div>
+                <div className="text-2xl font-bold">₹3,280.75</div>
                 <p className="text-xs text-muted-foreground">
                   -5.2% <span className="ml-1">from last month</span>
                 </p>
