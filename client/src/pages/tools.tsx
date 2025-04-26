@@ -1,4 +1,4 @@
-import { MainLayout } from "@/components/layout/main-layout";
+import { MainLayout } from "@/components/layouts/main-layout";
 import { Helmet } from "react-helmet-async";
 import { 
   Card, 
@@ -11,10 +11,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillReminderTool } from "@/components/tools/bill-reminder-tool";
 import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal";
 import { VoiceLiabilityModal } from "@/components/voice-input/voice-liability-modal";
+import { InterestCalculator } from "@/components/tools/interest-calculator";
+import { EMICalculator } from "@/components/tools/emi-calculator";
+import { TaxCalculator } from "@/components/tools/tax-calculator";
+import { CurrencyConverter } from "@/components/tools/currency-converter";
 import { Asset, Liability } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Mic, AlertTriangle, Calculator, Clock, FileText, BarChart3 } from "lucide-react";
+import { 
+  Mic, 
+  AlertTriangle, 
+  Calculator, 
+  Clock, 
+  FileText, 
+  BarChart3, 
+  DollarSign,
+  Percent,
+  BadgeDollarSign, 
+  Receipt
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -85,57 +100,41 @@ export default function ToolsPage() {
                       Bill Reminder
                     </Button>
                     <Button 
-                      variant={selectedTool === "loan-calculator" ? "default" : "ghost"} 
+                      variant={selectedTool === "emi-calculator" ? "default" : "ghost"} 
                       className="w-full justify-start text-left font-normal"
-                      onClick={() => {
-                        setSelectedTool("loan-calculator");
-                        toast({
-                          title: "Coming Soon",
-                          description: "Loan calculator tool will be available in a future update."
-                        });
-                      }}
+                      onClick={() => setSelectedTool("emi-calculator")}
                     >
-                      <Calculator className="mr-2 h-4 w-4" />
-                      Loan Calculator
+                      <Receipt className="mr-2 h-4 w-4" />
+                      EMI Calculator
                     </Button>
                     <Button 
-                      variant={selectedTool === "retirement-calculator" ? "default" : "ghost"} 
+                      variant={selectedTool === "interest-calculator" ? "default" : "ghost"} 
                       className="w-full justify-start text-left font-normal"
-                      onClick={() => {
-                        setSelectedTool("retirement-calculator");
-                        toast({
-                          title: "Coming Soon",
-                          description: "Retirement calculator tool will be available in a future update."
-                        });
-                      }}
+                      onClick={() => setSelectedTool("interest-calculator")}
                     >
-                      <Clock className="mr-2 h-4 w-4" />
-                      Retirement Calculator
+                      <Percent className="mr-2 h-4 w-4" />
+                      Interest Calculator
                     </Button>
                     <Button 
                       variant={selectedTool === "tax-calculator" ? "default" : "ghost"} 
                       className="w-full justify-start text-left font-normal"
-                      onClick={() => {
-                        setSelectedTool("tax-calculator");
-                        toast({
-                          title: "Coming Soon",
-                          description: "Tax calculator tool will be available in a future update."
-                        });
-                      }}
+                      onClick={() => setSelectedTool("tax-calculator")}
                     >
                       <FileText className="mr-2 h-4 w-4" />
                       Tax Calculator
                     </Button>
                     <Button 
+                      variant={selectedTool === "currency-converter" ? "default" : "ghost"} 
+                      className="w-full justify-start text-left font-normal"
+                      onClick={() => setSelectedTool("currency-converter")}
+                    >
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Currency Converter
+                    </Button>
+                    <Button 
                       variant={selectedTool === "investment-calculator" ? "default" : "ghost"} 
                       className="w-full justify-start text-left font-normal"
-                      onClick={() => {
-                        setSelectedTool("investment-calculator");
-                        toast({
-                          title: "Coming Soon",
-                          description: "Investment calculator tool will be available in a future update."
-                        });
-                      }}
+                      onClick={() => setSelectedTool("investment-calculator")}
                     >
                       <BarChart3 className="mr-2 h-4 w-4" />
                       Investment Calculator
@@ -158,8 +157,16 @@ export default function ToolsPage() {
                     <p className="text-sm">Bill reminder to track due dates</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-blue-500" />
-                    <p className="text-sm">Financial calculators for planning</p>
+                    <Receipt className="h-4 w-4 text-green-500" />
+                    <p className="text-sm">EMI & loan calculators</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-500" />
+                    <p className="text-sm">Tax estimation for FY 2024-25</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-indigo-500" />
+                    <p className="text-sm">Real-time currency conversion</p>
                   </div>
                 </CardContent>
               </Card>
@@ -244,25 +251,78 @@ export default function ToolsPage() {
                 </Card>
               )}
               
-              {(selectedTool === "loan-calculator" || 
-                selectedTool === "retirement-calculator" || 
-                selectedTool === "tax-calculator" || 
-                selectedTool === "investment-calculator") && (
+              {selectedTool === "emi-calculator" && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Coming Soon</CardTitle>
+                    <CardTitle>EMI Calculator</CardTitle>
                     <CardDescription>
-                      This feature will be available in a future update
+                      Calculate your Equated Monthly Installment for loans
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <EMICalculator />
+                  </CardContent>
+                </Card>
+              )}
+              
+              {selectedTool === "interest-calculator" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Interest Calculator</CardTitle>
+                    <CardDescription>
+                      Calculate simple and compound interest on your investments
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <InterestCalculator />
+                  </CardContent>
+                </Card>
+              )}
+              
+              {selectedTool === "tax-calculator" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tax Calculator (FY 2024-25)</CardTitle>
+                    <CardDescription>
+                      Estimate your income tax liability based on both new and old tax regimes
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <TaxCalculator />
+                  </CardContent>
+                </Card>
+              )}
+              
+              {selectedTool === "currency-converter" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Currency Converter</CardTitle>
+                    <CardDescription>
+                      Convert between different currencies using real-time exchange rates
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CurrencyConverter />
+                  </CardContent>
+                </Card>
+              )}
+              
+              {selectedTool === "investment-calculator" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Investment Calculator</CardTitle>
+                    <CardDescription>
+                      Calculate future value of investments with regular contributions
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <div className="rounded-full bg-muted p-6 mb-4">
                       <Clock className="h-12 w-12 text-muted-foreground" />
                     </div>
-                    <h3 className="text-xl font-medium mb-2">Feature Under Development</h3>
+                    <h3 className="text-xl font-medium mb-2">Coming Soon</h3>
                     <p className="text-center text-muted-foreground max-w-md">
-                      We're working hard to bring you the best financial tools. 
-                      This calculator is currently under development and will be available soon.
+                      We're working hard to bring you the investment calculator tool.
+                      This feature will be available in a future update.
                     </p>
                   </CardContent>
                 </Card>
