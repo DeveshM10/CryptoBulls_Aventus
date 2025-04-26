@@ -1,8 +1,14 @@
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
 // Initialize Google Generative AI with API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
+
+// Initialize OpenAI if API key is available
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+}) : null;
 
 // Process voice input to extract structured data
 export async function processVoiceInput(req: Request, res: Response) {
@@ -17,20 +23,64 @@ export async function processVoiceInput(req: Request, res: Response) {
       return res.status(400).json({ error: "Invalid type. Must be 'asset' or 'liability'" });
     }
 
-    // Check if API key is available
-    if (!process.env.GOOGLE_GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Google Gemini API key not configured" });
-    }
-
     // Generate a prompt based on the type
     const prompt = generatePrompt(text, type);
     
-    // Use Google Gemini to process the text
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    let responseText = "";
     
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
+    // Try Google Gemini first if API key is available
+    if (process.env.GOOGLE_GEMINI_API_KEY) {
+      try {
+        console.log("Attempting to use Google Gemini API...");
+        // Use Google Gemini to process the text
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-1.5-pro", // Updated to use the latest Gemini model 
+          generationConfig: {
+            temperature: 0.2, // Lower temperature for more deterministic extraction
+            maxOutputTokens: 1024,
+          }
+        });
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        responseText = response.text();
+        console.log("Google Gemini API response received successfully");
+      } catch (geminiError) {
+        console.error("Google Gemini API error:", geminiError);
+        
+        // Fall back to OpenAI if available
+        if (openai) {
+          console.log("Falling back to OpenAI...");
+          // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.2,
+            max_tokens: 1024
+          });
+          
+          responseText = completion.choices[0].message.content || "";
+          console.log("OpenAI response received successfully");
+        } else {
+          console.error("No OpenAI API key available for fallback");
+          throw new Error("Both Google Gemini and OpenAI APIs failed - check your API keys");
+        }
+      }
+    } else if (openai) {
+      // Use OpenAI directly if no Gemini API key
+      console.log("Using OpenAI directly as no Gemini API key is available");
+      // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        max_tokens: 1024
+      });
+      
+      responseText = completion.choices[0].message.content || "";
+    } else {
+      return res.status(500).json({ error: "No AI API keys configured. Please add either GOOGLE_GEMINI_API_KEY or OPENAI_API_KEY" });
+    }
     
     // Parse the JSON response
     try {
@@ -40,6 +90,7 @@ export async function processVoiceInput(req: Request, res: Response) {
                         responseText.match(/{[\s\S]*}/);
                         
       const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : responseText;
+      console.log("Extracted JSON string:", jsonStr);
       const extractedData = JSON.parse(jsonStr);
       
       res.status(200).json(extractedData);

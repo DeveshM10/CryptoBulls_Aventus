@@ -98,7 +98,7 @@ export function AssetManagement() {
             </div>
           ) : (
             assets.map((asset: Asset) => (
-              <Card key={asset.id}>
+              <Card key={asset._id || asset.id}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle>{asset.title}</CardTitle>
