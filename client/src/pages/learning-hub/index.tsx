@@ -96,7 +96,6 @@ const CourseCard = ({
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [currentModule, setCurrentModule] = useState(0);
   const [moduleProgress, setModuleProgress] = useState(progress);
