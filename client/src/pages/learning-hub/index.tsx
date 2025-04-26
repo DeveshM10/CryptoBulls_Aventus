@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { 
   GraduationCap, 
@@ -93,6 +94,8 @@ const CourseCard = ({
   badge,
   onClick 
 }) => {
+  const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [currentModule, setCurrentModule] = useState(0);
   const [moduleProgress, setModuleProgress] = useState(progress);
@@ -250,6 +253,14 @@ const CourseCard = ({
 // Video component with embedded YouTube player
 const VideoLesson = ({ videoId, title, description }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [thumbnailError, setThumbnailError] = useState(false);
+
+  useEffect(() => {
+    // Check if thumbnail exists
+    const img = new Image();
+    img.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    img.onerror = () => setThumbnailError(true);
+  }, [videoId]);
 
   return (
     <div className="space-y-4">
@@ -259,7 +270,7 @@ const VideoLesson = ({ videoId, title, description }) => {
             className="absolute inset-0 flex items-center justify-center cursor-pointer group"
             onClick={() => setIsPlaying(true)}
             style={{
-              backgroundImage: `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg)`,
+              backgroundImage: `url(https://img.youtube.com/vi/${videoId}/${thumbnailError ? 'hqdefault' : 'maxresdefault'}.jpg)`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -270,7 +281,7 @@ const VideoLesson = ({ videoId, title, description }) => {
           </div>
         ) : (
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
             title={title}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
