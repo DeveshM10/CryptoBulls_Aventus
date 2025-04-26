@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { Button } from "@/components/ui/button"
-import { Download, RefreshCw, TrendingUp, ChevronRight } from "lucide-react"
+import { Download, RefreshCw } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { QuickStats } from "./quick-stats"
+import { FinancialTips } from "./financial-tips"
  
 export function DashboardPage() {
   // State for refresh animation and time period filter
@@ -127,59 +128,10 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Transactions */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>You have 8 transactions this month</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Transaction Item */}
-              <div className="flex items-center">
-                <div className="mr-4 rounded-full bg-primary/10 p-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Investment Deposit</p>
-                  <p className="text-xs text-muted-foreground">Today, 11:32 AM</p>
-                </div>
-                <div className="text-sm font-medium text-green-600">+₹1,500.00</div>
-              </div>
-
-              {/* Transaction Item */}
-              <div className="flex items-center">
-                <div className="mr-4 rounded-full bg-red-100 p-2 dark:bg-red-900">
-                  <TrendingUp className="h-4 w-4 text-red-600 dark:text-red-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Utility Bill</p>
-                  <p className="text-xs text-muted-foreground">Yesterday, 3:45 PM</p>
-                </div>
-                <div className="text-sm font-medium text-red-600">-₹128.75</div>
-              </div>
-
-              {/* Transaction Item */}
-              <div className="flex items-center">
-                <div className="mr-4 rounded-full bg-primary/10 p-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Salary Deposit</p>
-                  <p className="text-xs text-muted-foreground">Apr 22, 9:00 AM</p>
-                </div>
-                <div className="text-sm font-medium text-green-600">+₹4,250.00</div>
-              </div>
-            </div>
-            
-            <div className="mt-4 flex justify-center">
-              <Button variant="outline" size="sm" className="w-full">
-                View All Transactions
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Financial Tips */}
+        <div className="lg:col-span-3">
+          <FinancialTips />
+        </div>
       </div>
     </div>
   )
