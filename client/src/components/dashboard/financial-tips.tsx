@@ -183,7 +183,7 @@ export function FinancialTips() {
         icon: <PiggyBank className="h-5 w-5" />,
         text: "Try to save at least 20% of your income for long-term financial security.",
         color: "text-blue-500",
-        bgColor: "bg-blue-100",
+        bgColor: "bg-blue-200",
       });
     } else if (savingsRate > 40) {
       newTips.push({
@@ -205,7 +205,7 @@ export function FinancialTips() {
         icon: <CreditCard className="h-5 w-5" />,
         text: "Consider refinancing or paying off high-interest debt (>10%) as a priority.",
         color: "text-red-500",
-        bgColor: "bg-red-100",
+        bgColor: "bg-red-200",
       });
     }
     
@@ -216,7 +216,7 @@ export function FinancialTips() {
         icon: <ArrowUpRight className="h-5 w-5" />,
         text: "Diversify your assets across different asset classes to reduce risk.",
         color: "text-purple-500",
-        bgColor: "bg-purple-100",
+        bgColor: "bg-purple-200",
       });
     }
     
@@ -230,8 +230,8 @@ export function FinancialTips() {
       newTips.push({
         icon: <LightbulbIcon className="h-5 w-5" />,
         text: "Build an emergency fund covering 3-6 months of expenses for financial security.",
-        color: "text-yellow-500",
-        bgColor: "bg-yellow-100",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-200",
       });
     }
     
