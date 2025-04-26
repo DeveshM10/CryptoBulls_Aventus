@@ -1,134 +1,92 @@
-import { useEffect, useRef } from 'react';
+"use client"
+
+import { useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 
 export function AnimatedBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
 
     // Set canvas dimensions
     const setCanvasDimensions = () => {
-      if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
 
-    // Initial setup
-    setCanvasDimensions();
-    window.addEventListener('resize', setCanvasDimensions);
+    setCanvasDimensions()
+    window.addEventListener("resize", setCanvasDimensions)
 
-    // Particle class
+    // Create particles
+    const particlesArray: Particle[] = []
+    const numberOfParticles = 50
+    const colors = ["rgba(124, 58, 237, 0.2)", "rgba(139, 92, 246, 0.2)", "rgba(167, 139, 250, 0.2)"]
+
     class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      color: string;
-      opacity: number;
+      x: number
+      y: number
+      size: number
+      speedX: number
+      speedY: number
+      color: string
 
       constructor() {
-        this.x = Math.random() * (canvas?.width || window.innerWidth);
-        this.y = Math.random() * (canvas?.height || window.innerHeight);
-        this.size = Math.random() * 5 + 1;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.color = this.getRandomColor();
-        this.opacity = Math.random() * 0.5 + 0.2;
-      }
-
-      getRandomColor() {
-        const colors = [
-          'rgba(124, 58, 237, OPACITY)', // Purple (primary)
-          'rgba(79, 70, 229, OPACITY)',  // Indigo
-          'rgba(16, 185, 129, OPACITY)', // Green (success)
-          'rgba(59, 130, 246, OPACITY)', // Blue
-        ];
-        
-        // Get a random color and ensure opacity is a string
-        const colorBase = colors[Math.floor(Math.random() * colors.length)];
-        return colorBase.replace('OPACITY', this.opacity?.toString() || "0.3");
+        this.x = Math.random() * canvas.width
+        this.y = Math.random() * canvas.height
+        this.size = Math.random() * 15 + 5
+        this.speedX = Math.random() * 0.5 - 0.25
+        this.speedY = Math.random() * 0.5 - 0.25
+        this.color = colors[Math.floor(Math.random() * colors.length)]
       }
 
       update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
+        this.x += this.speedX
+        this.y += this.speedY
 
-        // Bounce off edges
-        if (canvas && (this.x > canvas.width || this.x < 0)) {
-          this.speedX = -this.speedX;
-        }
-        if (canvas && (this.y > canvas.height || this.y < 0)) {
-          this.speedY = -this.speedY;
-        }
+        if (this.x > canvas.width) this.x = 0
+        else if (this.x < 0) this.x = canvas.width
+        if (this.y > canvas.height) this.y = 0
+        else if (this.y < 0) this.y = canvas.height
       }
 
       draw() {
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+        if (!ctx) return
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+        ctx.fillStyle = this.color
+        ctx.fill()
       }
     }
 
-    // Create particles
-    const particlesArray: Particle[] = [];
-    const canvasArea = canvas ? canvas.width * canvas.height : window.innerWidth * window.innerHeight;
-    const numberOfParticles = Math.floor(canvasArea / 10000);
-    
+    // Initialize particles
     for (let i = 0; i < numberOfParticles; i++) {
-      particlesArray.push(new Particle());
-    }
-
-    // Connect particles with lines if they are close
-    function connectParticles() {
-      if (!ctx) return;
-      
-      for (let i = 0; i < particlesArray.length; i++) {
-        for (let j = i; j < particlesArray.length; j++) {
-          const dx = particlesArray[i].x - particlesArray[j].x;
-          const dy = particlesArray[i].y - particlesArray[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < 100) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(124, 58, 237, ${0.2 - (distance/100) * 0.2})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-            ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-            ctx.stroke();
-          }
-        }
-      }
+      particlesArray.push(new Particle())
     }
 
     // Animation loop
     function animate() {
-      if (!ctx || !canvas) return;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
-        particlesArray[i].draw();
-      }
-      
-      connectParticles();
-      requestAnimationFrame(animate);
+      if (!ctx || !canvas) return
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      particlesArray.forEach(particle => {
+        particle.update()
+        particle.draw()
+      })
+
+      requestAnimationFrame(animate)
     }
 
-    animate();
+    animate()
 
-    // Cleanup
     return () => {
-      window.removeEventListener('resize', setCanvasDimensions);
-    };
-  }, []);
+      window.removeEventListener("resize", setCanvasDimensions)
+    }
+  }, [])
 
   return (
     <canvas 
@@ -136,10 +94,8 @@ export function AnimatedBackground() {
       className="absolute top-0 left-0 w-full h-full -z-10"
       style={{ pointerEvents: 'none' }}
     />
-  );
+  )
 }
-import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 
 interface Cube {
   x: number;
