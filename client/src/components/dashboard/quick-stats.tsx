@@ -45,8 +45,18 @@ export function QuickStats() {
 
   // Calculate net worth
   const calculateNetWorth = () => {
-    const totalAssets = assets.reduce((sum: number, asset: any) => sum + parseFloat(asset.value || "0"), 0);
-    const totalLiabilities = liabilities.reduce((sum: number, liability: any) => sum + parseFloat(liability.amount || "0"), 0);
+    const totalAssets = assets.reduce((sum: number, asset: any) => {
+      // Remove currency symbol and commas before parsing
+      const cleanValue = asset.value?.replace(/[₹,]/g, '') || "0";
+      return sum + parseFloat(cleanValue);
+    }, 0);
+    
+    const totalLiabilities = liabilities.reduce((sum: number, liability: any) => {
+      // Remove currency symbol and commas before parsing
+      const cleanAmount = liability.amount?.replace(/[₹,]/g, '') || "0";
+      return sum + parseFloat(cleanAmount);
+    }, 0);
+    
     return totalAssets - totalLiabilities;
   };
 
