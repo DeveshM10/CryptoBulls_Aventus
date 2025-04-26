@@ -22,12 +22,14 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [extractedData, setExtractedData] = useState<Partial<Asset> | null>(null)
+  const [currentTranscript, setCurrentTranscript] = useState<string>("")
   const { toast } = useToast()
 
   const handleStartListening = () => {
     setIsListening(true)
     setError(null)
     setExtractedData(null)
+    setCurrentTranscript("")
   }
 
   const handleStopListening = () => {
@@ -38,6 +40,10 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
     console.log("Extracted asset data:", data)
     setExtractedData(data)
     setIsProcessing(false)
+  }
+
+  const handleTranscriptChange = (text: string) => {
+    setCurrentTranscript(text)
   }
 
   const handleError = (errorMessage: string) => {
@@ -130,6 +136,12 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
                 <p className="text-center text-sm text-muted-foreground">
                   Listening... Speak clearly and describe your asset.
                 </p>
+                
+                {currentTranscript && (
+                  <div className="mt-2 p-3 border rounded-md bg-muted/30 w-full">
+                    <p className="text-sm">{currentTranscript}</p>
+                  </div>
+                )}
               </div>
             )}
             
@@ -183,14 +195,16 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
             )}
           </div>
           
-          {/* Hidden component for processing speech */}
+          {/* Voice processor component */}
           {isListening && (
             <VoiceProcessor
               isListening={isListening}
               onVoiceData={handleVoiceData}
+              onTranscriptChange={handleTranscriptChange}
               onError={handleError}
               onStopListening={handleStopListening}
               processingType="asset"
+              showControls={true}
             />
           )}
         </DialogContent>
