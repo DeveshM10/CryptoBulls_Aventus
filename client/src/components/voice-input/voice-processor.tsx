@@ -69,10 +69,16 @@ export function VoiceProcessor({
   // Process the voice input using Google Gemini API
   const processVoiceInput = useCallback(async (text: string) => {
     try {
+      console.log("Processing voice input:", text);
       const response = await apiRequest("POST", "/api/process-voice", {
-        text: text,
+        text: text.trim(),
         type: processingType
       })
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process voice input');
+      }
       
       if (!response.ok) {
         throw new Error(`Failed to process voice input: ${response.statusText}`)
