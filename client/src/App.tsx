@@ -6,6 +6,7 @@ import { Web3Provider } from "@/components/wallet/web3-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { HelmetProvider } from 'react-helmet-async';
 import Dashboard from "@/pages/dashboard";
 import KycPage from "@/pages/kyc";
 import NotFound from "@/pages/not-found";
@@ -48,16 +49,18 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="finvault-theme">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Web3Provider>
-            <Router />
-            <Toaster />
-          </Web3Provider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="system" storageKey="finvault-theme">
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <Web3Provider>
+              <Router />
+              <Toaster />
+            </Web3Provider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

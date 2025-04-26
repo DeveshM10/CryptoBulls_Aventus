@@ -139,7 +139,7 @@ export function AssetManagement() {
             assets
               .filter((asset: Asset) => asset.type === 'real-estate')
               .map((asset: Asset) => (
-                <Card key={asset.id}>
+                <Card key={asset._id || asset.id}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle>{asset.title}</CardTitle>
@@ -186,7 +186,7 @@ export function AssetManagement() {
                 ['stocks', 'bonds', 'crypto', 'gold'].includes(asset.type)
               )
               .map((asset: Asset) => (
-                <Card key={asset.id}>
+                <Card key={asset._id || asset.id}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle>{asset.title}</CardTitle>
@@ -228,7 +228,7 @@ export function AssetManagement() {
             assets
               .filter((asset: Asset) => asset.type === 'cash')
               .map((asset: Asset) => (
-                <Card key={asset.id}>
+                <Card key={asset._id || asset.id}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle>{asset.title}</CardTitle>

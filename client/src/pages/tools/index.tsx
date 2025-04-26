@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { FinancialTools } from "@/components/tools/financial-tools";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 export default function ToolsPage() {
   return (
