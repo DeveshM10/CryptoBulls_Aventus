@@ -1,4 +1,4 @@
-import { MainLayout } from "@/components/layouts/main-layout";
+import { MainLayout } from "@/components/layout/main-layout";
 import { Helmet } from "react-helmet-async";
 import { 
   Card, 
