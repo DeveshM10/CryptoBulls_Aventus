@@ -45,8 +45,8 @@ export function QuickStats() {
 
   // Calculate net worth
   const calculateNetWorth = () => {
-    const totalAssets = assets.reduce((sum, asset) => sum + parseFloat(asset.value || "0"), 0);
-    const totalLiabilities = liabilities.reduce((sum, liability) => sum + parseFloat(liability.amount || "0"), 0);
+    const totalAssets = assets.reduce((sum: number, asset: any) => sum + parseFloat(asset.value || "0"), 0);
+    const totalLiabilities = liabilities.reduce((sum: number, liability: any) => sum + parseFloat(liability.amount || "0"), 0);
     return totalAssets - totalLiabilities;
   };
 
@@ -55,8 +55,8 @@ export function QuickStats() {
     // Here we're assuming income items in the budget have a specific category type
     // Adjust this based on your actual data structure
     return budgetItems
-      .filter(item => item.status === "income")
-      .reduce((sum, item) => sum + parseFloat(item.budgeted || "0"), 0);
+      .filter((item: any) => item.status === "income")
+      .reduce((sum: number, item: any) => sum + parseFloat(item.budgeted || "0"), 0);
   };
 
   // Calculate total expenses
@@ -64,8 +64,8 @@ export function QuickStats() {
     // For expenses, we're summing the 'spent' field from budget items
     // Adjust this based on your actual data structure
     return budgetItems
-      .filter(item => item.status !== "income")
-      .reduce((sum, item) => sum + parseFloat(item.spent || "0"), 0);
+      .filter((item: any) => item.status !== "income")
+      .reduce((sum: number, item: any) => sum + parseFloat(item.spent || "0"), 0);
   };
 
   // Calculate savings rate
