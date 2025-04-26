@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { Button } from "@/components/ui/button"
 import { Download, RefreshCw, TrendingUp, ChevronRight } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -62,8 +63,66 @@ export function DashboardPage() {
             <CardTitle>Monthly Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] flex items-center justify-center border rounded-lg">
-              <p className="text-sm text-muted-foreground">Monthly financial chart will display here</p>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={[
+                    { month: 'Jan', income: 48000, expenses: 35000, savings: 13000 },
+                    { month: 'Feb', income: 52000, expenses: 37000, savings: 15000 },
+                    { month: 'Mar', income: 49000, expenses: 36000, savings: 13000 },
+                    { month: 'Apr', income: 53000, expenses: 34000, savings: 19000 },
+                    { month: 'May', income: 55000, expenses: 38000, savings: 17000 },
+                    { month: 'Jun', income: 54000, expenses: 36000, savings: 18000 }
+                  ]}
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="month" />
+                  <YAxis tickFormatter={(value) => `₹${(value/1000)}k`} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-background border rounded-lg p-2 shadow-md">
+                            <p className="font-medium">{label}</p>
+                            {payload.map((entry) => (
+                              <p key={entry.name} style={{ color: entry.color }}>
+                                {entry.name}: ₹{entry.value.toLocaleString()}
+                              </p>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="income"
+                    fill="#4ade80"
+                    stroke="#4ade80"
+                    fillOpacity={0.2}
+                    name="Income"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="expenses"
+                    fill="#f43f5e"
+                    stroke="#f43f5e"
+                    fillOpacity={0.2}
+                    name="Expenses"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="savings"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={{ fill: "#8b5cf6" }}
+                    name="Savings"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
