@@ -71,7 +71,7 @@ export function KycForm() {
       formData.append("dob", data.dob);
       formData.append("address", data.address);
       formData.append("walletAddress", data.walletAddress);
-      
+
       if (data.panImage) {
         formData.append("panImage", data.panImage);
       }
@@ -272,9 +272,24 @@ export function KycForm() {
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Submit KYC Details
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className={`relative transition-all duration-200 ${isSubmitting ? 'bg-primary/80' : ''}`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <span className="mr-2">Submit KYC Details</span>
+                      {Object.keys(form.formState.errors).length > 0 && (
+                        <span className="text-red-500">⚠️</span>
+                      )}
+                    </div>
+                  )}
                 </Button>
               </div>
             </form>
