@@ -130,23 +130,6 @@ export function QuickStats() {
       }, 0);
 
       return budgetIncome + assetProfits;
-          
-          if (!isIncome) return sum;
-          
-          let amount = 0;
-          if (typeof item.budgeted === 'string') {
-            const cleanAmount = item.budgeted.replace(/[^0-9.]/g, '');
-            amount = parseFloat(cleanAmount);
-          } else if (typeof item.budgeted === 'number') {
-            amount = item.budgeted;
-          }
-          
-          return isNaN(amount) ? sum : sum + amount;
-        } catch (err) {
-          console.error("Error parsing income item:", item, err);
-          return sum;
-        }
-      }, 0);
     } catch (err) {
       console.error("Error calculating total income:", err);
       return 0;
