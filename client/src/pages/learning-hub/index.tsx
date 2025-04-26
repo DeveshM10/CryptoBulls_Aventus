@@ -149,7 +149,7 @@ const CourseCard = ({
     >
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Card className="h-full flex flex-col overflow-hidden group cursor-pointer">
+          <Card className="h-full flex flex-col overflow-hidden group cursor-pointer transition-all duration-200 hover:shadow-lg">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
           <div 
@@ -250,7 +250,7 @@ const CourseCard = ({
         </CardFooter>
       </Card>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
