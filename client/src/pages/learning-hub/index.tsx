@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   GraduationCap, 
   BookOpen, 
