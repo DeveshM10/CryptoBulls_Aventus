@@ -220,12 +220,6 @@ export default function AssetsPage() {
             </svg>
             <span className="font-bold">FinVault</span>
           </a>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a className="font-medium transition-colors hover:text-primary" href="/">Dashboard</a>
-            <a className="font-medium transition-colors hover:text-primary text-primary" href="/assets">Assets</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/liabilities">Liabilities</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/budget">Budget</a>
-          </nav>
         </div>
       </header>
 
@@ -284,12 +278,12 @@ export default function AssetsPage() {
                         name="value"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Value ($)</FormLabel>
+                            <FormLabel>Value (₹)</FormLabel>
                             <FormControl>
                               <Input type="text" placeholder="e.g., 100000" {...field} />
                             </FormControl>
                             <FormDescription>
-                              Current value of your asset in USD
+                              Current value of your asset in INR
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -417,7 +411,7 @@ export default function AssetsPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${totalAssetValue.toLocaleString()}
+                      ₹{totalAssetValue.toLocaleString()}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {assets.length} <span className="ml-1">total assets</span>
@@ -440,7 +434,7 @@ export default function AssetsPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${assets
+                      ₹{assets
                           .filter((asset: Asset) => asset.type.includes('real_estate'))
                           .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -466,7 +460,7 @@ export default function AssetsPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${assets
+                      ₹{assets
                           .filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type)))
                           .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -492,7 +486,7 @@ export default function AssetsPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${assets
+                      ₹{assets
                           .filter((asset: Asset) => asset.type.includes('cash'))
                           .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -511,7 +505,7 @@ export default function AssetsPage() {
               <CardTitle>Asset Breakdown</CardTitle>
               <div className="text-sm text-muted-foreground">
                 {assets.length > 0 ? 
-                  `Total: $${totalAssetValue.toLocaleString()}` : 
+                  `Total: ₹${totalAssetValue.toLocaleString()}` : 
                   "No assets to display"
                 }
               </div>
@@ -578,10 +572,10 @@ export default function AssetsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis 
-                      tickFormatter={(value) => `$${value.toLocaleString()}`}
+                      tickFormatter={(value) => `₹${value.toLocaleString()}`}
                     />
                     <Tooltip
-                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Total Value']}
+                      formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Total Value']}
                     />
                     <Legend />
                     <Line

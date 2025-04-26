@@ -171,7 +171,7 @@ export function DashboardPage() {
                       <p className="text-sm font-medium">Investment Deposit</p>
                       <p className="text-xs text-muted-foreground">Today, 11:32 AM</p>
                     </div>
-                    <div className="text-sm font-medium text-green-600">+$1,500.00</div>
+                    <div className="text-sm font-medium text-green-600">+₹1,500.00</div>
                   </div>
 
                   {/* Transaction Item */}
@@ -183,7 +183,7 @@ export function DashboardPage() {
                       <p className="text-sm font-medium">Utility Bill</p>
                       <p className="text-xs text-muted-foreground">Yesterday, 3:45 PM</p>
                     </div>
-                    <div className="text-sm font-medium text-red-600">-$128.75</div>
+                    <div className="text-sm font-medium text-red-600">-₹128.75</div>
                   </div>
 
                   {/* Transaction Item */}
@@ -195,7 +195,7 @@ export function DashboardPage() {
                       <p className="text-sm font-medium">Salary Deposit</p>
                       <p className="text-xs text-muted-foreground">Apr 22, 9:00 AM</p>
                     </div>
-                    <div className="text-sm font-medium text-green-600">+$4,250.00</div>
+                    <div className="text-sm font-medium text-green-600">+₹4,250.00</div>
                   </div>
                 </div>
                 
