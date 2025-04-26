@@ -39,43 +39,128 @@ export function QuickStats() {
   useEffect(() => {
     // Set loading to false when all data is loaded
     if (assets && liabilities && budgetItems) {
+      console.log("Assets:", assets);
+      console.log("Liabilities:", liabilities);
+      console.log("Budget items:", budgetItems);
       setIsLoading(false);
     }
   }, [assets, liabilities, budgetItems]);
 
   // Calculate net worth
   const calculateNetWorth = () => {
-    const totalAssets = assets.reduce((sum: number, asset: any) => {
-      // Remove currency symbol and commas before parsing
-      const cleanValue = asset.value?.replace(/[₹,]/g, '') || "0";
-      return sum + parseFloat(cleanValue);
-    }, 0);
-    
-    const totalLiabilities = liabilities.reduce((sum: number, liability: any) => {
-      // Remove currency symbol and commas before parsing
-      const cleanAmount = liability.amount?.replace(/[₹,]/g, '') || "0";
-      return sum + parseFloat(cleanAmount);
-    }, 0);
-    
-    return totalAssets - totalLiabilities;
+    try {
+      // Handle assets
+      const totalAssets = assets.reduce((sum: number, asset: any) => {
+        try {
+          // Since we're using MongoDB, the asset value might be stored as a string with currency symbols
+          let value = 0;
+          if (typeof asset.value === 'string') {
+            // Remove currency symbols, commas, and other non-numeric characters
+            const cleanValue = asset.value.replace(/[^0-9.]/g, '');
+            value = parseFloat(cleanValue);
+          } else if (typeof asset.value === 'number') {
+            value = asset.value;
+          }
+          return isNaN(value) ? sum : sum + value;
+        } catch (err) {
+          console.error("Error parsing asset value:", asset.value, err);
+          return sum;
+        }
+      }, 0);
+      
+      // Handle liabilities
+      const totalLiabilities = liabilities.reduce((sum: number, liability: any) => {
+        try {
+          let amount = 0;
+          if (typeof liability.amount === 'string') {
+            // Remove currency symbols, commas, and other non-numeric characters
+            const cleanAmount = liability.amount.replace(/[^0-9.]/g, '');
+            amount = parseFloat(cleanAmount);
+          } else if (typeof liability.amount === 'number') {
+            amount = liability.amount;
+          }
+          return isNaN(amount) ? sum : sum + amount;
+        } catch (err) {
+          console.error("Error parsing liability amount:", liability.amount, err);
+          return sum;
+        }
+      }, 0);
+      
+      return totalAssets - totalLiabilities;
+    } catch (err) {
+      console.error("Error calculating net worth:", err);
+      return 0;
+    }
   };
 
   // Calculate total income
   const calculateTotalIncome = () => {
-    // Here we're assuming income items in the budget have a specific category type
-    // Adjust this based on your actual data structure
-    return budgetItems
-      .filter((item: any) => item.status === "income")
-      .reduce((sum: number, item: any) => sum + parseFloat(item.budgeted || "0"), 0);
+    try {
+      const incomeCategories = ['income', 'salary', 'deposit', 'investment return'];
+      
+      return budgetItems.reduce((sum: number, item: any) => {
+        try {
+          // Check if this is an income item
+          const isIncome = incomeCategories.some(category => 
+            item.title?.toLowerCase().includes(category) || 
+            (item.status?.toLowerCase() === 'income')
+          );
+          
+          if (!isIncome) return sum;
+          
+          let amount = 0;
+          if (typeof item.budgeted === 'string') {
+            const cleanAmount = item.budgeted.replace(/[^0-9.]/g, '');
+            amount = parseFloat(cleanAmount);
+          } else if (typeof item.budgeted === 'number') {
+            amount = item.budgeted;
+          }
+          
+          return isNaN(amount) ? sum : sum + amount;
+        } catch (err) {
+          console.error("Error parsing income item:", item, err);
+          return sum;
+        }
+      }, 0);
+    } catch (err) {
+      console.error("Error calculating total income:", err);
+      return 0;
+    }
   };
 
   // Calculate total expenses
   const calculateTotalExpenses = () => {
-    // For expenses, we're summing the 'spent' field from budget items
-    // Adjust this based on your actual data structure
-    return budgetItems
-      .filter((item: any) => item.status !== "income")
-      .reduce((sum: number, item: any) => sum + parseFloat(item.spent || "0"), 0);
+    try {
+      const incomeCategories = ['income', 'salary', 'deposit', 'investment return'];
+      
+      return budgetItems.reduce((sum: number, item: any) => {
+        try {
+          // Check if this is an expense item (not income)
+          const isIncome = incomeCategories.some(category => 
+            item.title?.toLowerCase().includes(category) || 
+            (item.status?.toLowerCase() === 'income')
+          );
+          
+          if (isIncome) return sum;
+          
+          let amount = 0;
+          if (typeof item.spent === 'string') {
+            const cleanAmount = item.spent.replace(/[^0-9.]/g, '');
+            amount = parseFloat(cleanAmount);
+          } else if (typeof item.spent === 'number') {
+            amount = item.spent;
+          }
+          
+          return isNaN(amount) ? sum : sum + amount;
+        } catch (err) {
+          console.error("Error parsing expense item:", item, err);
+          return sum;
+        }
+      }, 0);
+    } catch (err) {
+      console.error("Error calculating total expenses:", err);
+      return 0;
+    }
   };
 
   // Calculate savings rate
@@ -95,18 +180,18 @@ export function QuickStats() {
     })}`;
   };
 
-  // Hardcoded previous values for demonstration
+  // Use fixed percentages for demonstration
   // In a real app, you would fetch historical data or calculate trends
-  const prevNetWorth = calculateNetWorth() / 1.081;  // 8.1% increase
-  const prevIncome = calculateTotalIncome() / 1.023;  // 2.3% increase
-  const prevExpenses = calculateTotalExpenses() / 0.948;  // 5.2% decrease
-  const prevSavingsRate = calculateSavingsRate() / 1.125;  // 12.5% increase
+  const netWorthChange = 8.1;  // 8.1% increase
+  const incomeChange = 2.3;    // 2.3% increase 
+  const expensesChange = -5.2; // 5.2% decrease
+  const savingsRateChange = 12.5; // 12.5% increase
 
-  // Calculate percentage changes
-  const netWorthChange = ((calculateNetWorth() - prevNetWorth) / prevNetWorth) * 100;
-  const incomeChange = ((calculateTotalIncome() - prevIncome) / prevIncome) * 100;
-  const expensesChange = ((calculateTotalExpenses() - prevExpenses) / prevExpenses) * 100;
-  const savingsRateChange = calculateSavingsRate() - prevSavingsRate;
+  // Calculate previous values based on current values and fixed percentage changes
+  const prevNetWorth = calculateNetWorth() / (1 + netWorthChange/100);
+  const prevIncome = calculateTotalIncome() / (1 + incomeChange/100);
+  const prevExpenses = calculateTotalExpenses() / (1 + expensesChange/100);
+  const prevSavingsRate = calculateSavingsRate() - savingsRateChange;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
