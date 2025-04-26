@@ -76,7 +76,7 @@ const CustomTooltip = ({ active, payload, formatter }: any) => {
     return (
       <div className="bg-background border rounded-md shadow-sm p-2 text-sm">
         <p className="font-medium">{payload[0].name}</p>
-        <p className="text-primary">${Number(payload[0].value).toLocaleString()}</p>
+        <p className="text-primary">₹{Number(payload[0].value).toLocaleString()}</p>
       </div>
     );
   }
@@ -86,7 +86,7 @@ const CustomTooltip = ({ active, payload, formatter }: any) => {
 export default function LiabilitiesPage() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  
+
   // Set up form
   const form = useForm<LiabilityFormValues>({
     resolver: zodResolver(liabilityFormSchema),
@@ -100,7 +100,7 @@ export default function LiabilitiesPage() {
       status: "current",
     },
   });
-  
+
   // Query to fetch liabilities
   const { data: liabilities = [], isLoading } = useQuery({
     queryKey: ['/api/liabilities'],
@@ -112,7 +112,7 @@ export default function LiabilitiesPage() {
       return response.json();
     },
   });
-  
+
   // Mutation to create a new liability
   const createLiabilityMutation = useMutation({
     mutationFn: async (newLiability: LiabilityFormValues) => {
@@ -123,21 +123,21 @@ export default function LiabilitiesPage() {
         },
         body: JSON.stringify(newLiability),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to create liability');
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
       // Close the dialog and reset form
       setOpen(false);
       form.reset();
-      
+
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['/api/liabilities'] });
-      
+
       // Show success message
       toast({
         title: "Liability Added",
@@ -152,12 +152,12 @@ export default function LiabilitiesPage() {
       });
     },
   });
-  
+
   // Handle form submission
   function onSubmit(data: LiabilityFormValues) {
     createLiabilityMutation.mutate(data);
   }
-  
+
   // Define liability interface
   interface Liability {
     _id: string;
@@ -170,18 +170,18 @@ export default function LiabilitiesPage() {
     dueDate: string;
     status: 'current' | 'warning' | 'late';
   }
-  
+
   // Calculate totals and prepare chart data
   const totalLiabilityAmount = liabilities.reduce((sum: number, liability: Liability) => 
     sum + Number(liability.amount.replace(/[^0-9.-]+/g, '')), 0);
-  
+
   // Prepare chart data for liability types distribution
   type ChartDataItem = { name: string; value: number };
-  
+
   const liabilityTypeData = liabilities.reduce((acc: ChartDataItem[], liability: Liability) => {
     const existingType = acc.find(item => item.name === liability.type);
     const liabilityValue = Number(liability.amount.replace(/[^0-9.-]+/g, ''));
-    
+
     if (existingType) {
       existingType.value += liabilityValue;
     } else {
@@ -190,10 +190,10 @@ export default function LiabilitiesPage() {
         value: liabilityValue
       });
     }
-    
+
     return acc;
   }, []);
-  
+
   // Prepare data for future projections - simple amortization calculation
   const projectMonths = 12; // Project 12 months ahead
   const projectionData = Array.from({ length: projectMonths + 1 }, (_, i) => {
@@ -205,13 +205,13 @@ export default function LiabilitiesPage() {
       const remainingBalance = Math.max(0, amount - (payment * i));
       return sum + remainingBalance;
     }, 0);
-    
+
     return {
       month: i,
       value: totalForMonth
     };
   });
-  
+
   // Colors for pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#ec4899'];
   return (
@@ -290,12 +290,12 @@ export default function LiabilitiesPage() {
                         name="amount"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Outstanding Amount ($)</FormLabel>
+                            <FormLabel>Outstanding Amount (₹)</FormLabel>
                             <FormControl>
                               <Input type="text" placeholder="e.g., 150000" {...field} />
                             </FormControl>
                             <FormDescription>
-                              Current outstanding balance in USD
+                              Current outstanding balance in INR
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -352,7 +352,7 @@ export default function LiabilitiesPage() {
                         name="payment"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Monthly Payment ($)</FormLabel>
+                            <FormLabel>Monthly Payment (₹)</FormLabel>
                             <FormControl>
                               <Input 
                                 type="text" 
@@ -442,7 +442,7 @@ export default function LiabilitiesPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${totalLiabilityAmount.toLocaleString()}
+                      ₹{totalLiabilityAmount.toLocaleString()}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {liabilities.length} <span className="ml-1">total liabilities</span>
@@ -451,7 +451,7 @@ export default function LiabilitiesPage() {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Mortgage</CardTitle>
@@ -465,7 +465,7 @@ export default function LiabilitiesPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${liabilities
+                      ₹{liabilities
                           .filter((liability: Liability) => liability.type.includes('mortgage'))
                           .reduce((sum: number, liability: Liability) => sum + Number(liability.amount.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -477,7 +477,7 @@ export default function LiabilitiesPage() {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Credit Cards</CardTitle>
@@ -491,7 +491,7 @@ export default function LiabilitiesPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${liabilities
+                      ₹{liabilities
                           .filter((liability: Liability) => liability.type.includes('credit_card'))
                           .reduce((sum: number, liability: Liability) => sum + Number(liability.amount.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -503,7 +503,7 @@ export default function LiabilitiesPage() {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Auto & Personal Loans</CardTitle>
@@ -517,7 +517,7 @@ export default function LiabilitiesPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">
-                      ${liabilities
+                      ₹{liabilities
                           .filter((liability: Liability) => ['auto_loan', 'personal_loan'].some(type => liability.type.includes(type)))
                           .reduce((sum: number, liability: Liability) => sum + Number(liability.amount.replace(/[^0-9.-]+/g, '')), 0)
                           .toLocaleString()}
@@ -570,7 +570,7 @@ export default function LiabilitiesPage() {
               )}
             </CardContent>
           </Card>
-          
+
           {/* Liability Payoff Projection Chart */}
           <Card className="col-span-full">
             <CardHeader>
@@ -595,11 +595,11 @@ export default function LiabilitiesPage() {
                       label={{ value: 'Months', position: 'insideBottomRight', offset: -10 }} 
                     />
                     <YAxis 
-                      tickFormatter={(value) => `$${value.toLocaleString()}`}
+                      tickFormatter={(value) => `₹${value.toLocaleString()}`}
                       label={{ value: 'Liability Balance', angle: -90, position: 'insideLeft' }}
                     />
                     <Tooltip 
-                      formatter={(value) => [`$${Number(value).toLocaleString()}`, "Balance"]} 
+                      formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Balance"]} 
                       labelFormatter={(label) => `Month ${label}`}
                     />
                     <Area 
@@ -614,7 +614,7 @@ export default function LiabilitiesPage() {
               )}
             </CardContent>
           </Card>
-          
+
           {/* Table of Liabilities */}
           <Card className="col-span-full">
             <CardHeader>
@@ -650,9 +650,9 @@ export default function LiabilitiesPage() {
                           <td className="p-2">
                             {liabilityTypes.find(t => t.value === liability.type)?.label || liability.type}
                           </td>
-                          <td className="p-2">${Number(liability.amount.replace(/[^0-9.-]+/g, '')).toLocaleString()}</td>
+                          <td className="p-2">₹{Number(liability.amount.replace(/[^0-9.-]+/g, '')).toLocaleString()}</td>
                           <td className="p-2">{liability.interest}%</td>
-                          <td className="p-2">${Number(liability.payment.replace(/[^0-9.-]+/g, '')).toLocaleString()}</td>
+                          <td className="p-2">₹{Number(liability.payment.replace(/[^0-9.-]+/g, '')).toLocaleString()}</td>
                           <td className="p-2">{new Date(liability.dueDate).toLocaleDateString()}</td>
                           <td className="p-2">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
