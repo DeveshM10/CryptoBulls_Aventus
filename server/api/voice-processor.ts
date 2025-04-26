@@ -19,13 +19,7 @@ export async function processVoiceInput(req: Request, res: Response) {
 
     // Check if API key is available
     if (!process.env.GOOGLE_GEMINI_API_KEY) {
-      console.error("Missing Google Gemini API key");
-      return res.status(500).json({ error: "Missing API configuration" });
-    }
-
-    // Validate input text
-    if (typeof text !== 'string' || text.trim().length === 0) {
-      return res.status(400).json({ error: "Invalid input text" });
+      return res.status(500).json({ error: "Google Gemini API key not configured" });
     }
 
     // Generate a prompt based on the type
