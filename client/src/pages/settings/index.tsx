@@ -1,189 +1,551 @@
-import { Sidebar } from "@/components/layout/sidebar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Bell, Shield, Lock, Globe, Settings as SettingsIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ModeToggle } from "@/components/ui/mode-toggle";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { 
+  AlertTriangle, 
+  Bell, 
+  CheckCircle, 
+  Edit, 
+  Globe, 
+  Key, 
+  Loader2, 
+  Mail, 
+  Save, 
+  Shield, 
+  Trash, 
+  User, 
+  Wallet 
+} from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+// Define schema for profile updates
+const profileSchema = z.object({
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  fullName: z.string().optional(),
+  walletAddress: z.string().optional(),
+  address: z.string().optional(),
+});
 
 export default function SettingsPage() {
+  const [, navigate] = useLocation();
+  const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Redirect if user is not logged in
+  useEffect(() => {
+    if (!user && !logoutMutation.isLoading) {
+      navigate('/auth');
+    }
+  }, [user, navigate, logoutMutation.isLoading]);
+
+  // Setup form with user data
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      username: user?.username || "",
+      email: user?.email || "",
+      fullName: user?.fullName || "",
+      walletAddress: user?.walletAddress || "",
+      address: user?.address || "",
+    },
+  });
+
+  // Update form values when user data changes
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        username: user.username || "",
+        email: user.email || "",
+        fullName: user.fullName || "",
+        walletAddress: user.walletAddress || "",
+        address: user.address || "",
+      });
+    }
+  }, [user, profileForm]);
+
+  // Handle profile update
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof profileSchema>) => {
+      const res = await apiRequest("PATCH", `/api/user/${user?.id}`, data);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/user"], data);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+      setIsEditing(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle profile form submission
+  const onProfileSubmit = (values: z.infer<typeof profileSchema>) => {
+    updateProfileMutation.mutate(values);
+  };
+
+  // Handle logout button click
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate('/');
+      },
+    });
+  };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-3 md:px-6">
-        <div className="flex items-center gap-2">
-          <a className="mr-6 flex items-center gap-2 md:mr-8" href="/">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <span className="font-bold">FinVault</span>
-          </a>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a className="font-medium transition-colors hover:text-primary" href="/dashboard">Dashboard</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/assets">Assets</a>
-            <a className="font-medium transition-colors hover:text-primary" href="/settings">Settings</a>
-          </nav>
+    <div className="container max-w-6xl px-4 py-8">
+      <div className="flex flex-col gap-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">
+              Manage your account settings and preferences
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={handleLogout}
+            disabled={logoutMutation.isLoading}
+          >
+            {logoutMutation.isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logging out...
+              </>
+            ) : (
+              "Log out"
+            )}
+          </Button>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <div className="flex min-h-[calc(100vh-73px)]">
-        {/* Sidebar */}
-        <Sidebar />
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="mb-8 grid w-full grid-cols-4">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
 
-        {/* Main content area with padding for fixed sidebar */}
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Settings</h1>
-            <ModeToggle />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Settings</CardTitle>
-              <CardDescription>Manage your account details and preferences</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                  <User className="h-8 w-8 text-muted-foreground/70" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-medium">Alex Johnson</p>
-                  <p className="text-sm text-muted-foreground">alex.johnson@example.com</p>
-                </div>
-                <Button variant="outline" className="ml-auto">Edit Profile</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Profile Tab */}
+          <TabsContent value="profile">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Account</CardTitle>
-                <User className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Personal Information</p>
-                  <p className="text-xs text-muted-foreground">Update your name, email, and profile photo</p>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Profile Information</CardTitle>
+                    <CardDescription>
+                      View and update your personal information
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant={isEditing ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Done
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </>
+                    )}
+                  </Button>
                 </div>
-                <Button variant="outline" size="sm" className="w-full">Manage Account</Button>
+              </CardHeader>
+              <CardContent>
+                <Form {...profileForm}>
+                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                        <FormField
+                          control={profileForm.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Username</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                  <Input 
+                                    placeholder="Username" 
+                                    className="pl-9" 
+                                    {...field}
+                                    disabled={!isEditing}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={profileForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                  <Input 
+                                    placeholder="Email" 
+                                    className="pl-9" 
+                                    {...field}
+                                    disabled={!isEditing}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={profileForm.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your full name" 
+                                {...field}
+                                disabled={!isEditing}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={profileForm.control}
+                        name="walletAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Wallet Address</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Wallet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                  placeholder="Your wallet address" 
+                                  className="pl-9"
+                                  {...field}
+                                  disabled={!isEditing}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={profileForm.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Physical Address</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your address" 
+                                {...field}
+                                disabled={!isEditing}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {isEditing && (
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          disabled={updateProfileMutation.isLoading}
+                        >
+                          {updateProfileMutation.isLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="mr-2 h-4 w-4" />
+                              Save Changes
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </form>
+                </Form>
               </CardContent>
             </Card>
 
+            <div className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>KYC Status</CardTitle>
+                  <CardDescription>
+                    Your KYC verification status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className={`rounded-full p-2 ${user.kycVerified ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
+                      {user.kycVerified ? (
+                        <CheckCircle className="h-6 w-6" />
+                      ) : (
+                        <AlertTriangle className="h-6 w-6" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-medium">
+                        {user.kycVerified ? 'Verified' : 'Verification Required'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {user.kycVerified 
+                          ? 'Your KYC verification is complete. You have full access to all features.' 
+                          : 'Complete your KYC verification to access all features.'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  {!user.kycVerified && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/kyc')}
+                    >
+                      Complete KYC
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Account Tab */}
+          <TabsContent value="account">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Security</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+                <CardDescription>
+                  Manage your account preferences
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Password & Authentication</p>
-                  <p className="text-xs text-muted-foreground">Manage your password and security settings</p>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Account Type</Label>
+                    <div className="mt-1 rounded-md border p-3">Personal Account</div>
+                  </div>
+                  <div>
+                    <Label>Account Created</Label>
+                    <div className="mt-1 rounded-md border p-3">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                    </div>
+                  </div>
                 </div>
-                <Button variant="outline" size="sm" className="w-full">Security Settings</Button>
+                
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium">Danger Zone</h3>
+                  <Separator className="my-4" />
+                  <div className="flex items-center justify-between rounded-md border border-destructive/50 p-4">
+                    <div>
+                      <h4 className="font-medium">Delete Account</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Permanently delete your account and all your data
+                      </p>
+                    </div>
+                    <Button variant="destructive" size="sm">
+                      <Trash className="mr-2 h-4 w-4" />
+                      Delete Account
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
+          {/* Security Tab */}
+          <TabsContent value="security">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Notifications</CardTitle>
-                <Bell className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Manage your account security and privacy
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Notification Preferences</p>
-                  <p className="text-xs text-muted-foreground">Configure how you receive alerts and updates</p>
+              <CardContent className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Password</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Update your password to keep your account secure
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Key className="mr-2 h-4 w-4" />
+                      Change Password
+                    </Button>
+                  </div>
                 </div>
-                <Button variant="outline" size="sm" className="w-full">Notification Settings</Button>
+                
+                <Separator />
+                
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Two-Factor Authentication</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Add an extra layer of security to your account
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Setup 2FA
+                    </Button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Sessions</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Manage your active sessions and devices
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Globe className="mr-2 h-4 w-4" />
+                      Manage Sessions
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Application Settings</CardTitle>
-              <CardDescription>Customize your application experience</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Theme</Label>
-                    <p className="text-sm text-muted-foreground">Toggle between light, dark, or system theme</p>
+          {/* Notifications Tab */}
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Settings</CardTitle>
+                <CardDescription>
+                  Manage how you receive notifications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Email Notifications</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Receive email notifications about account activity
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="checkbox" 
+                        id="email-notifications" 
+                        className="h-4 w-4 rounded border-gray-300"
+                        defaultChecked
+                      />
+                      <Label htmlFor="email-notifications">Enabled</Label>
+                    </div>
                   </div>
-                  <ModeToggle />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Receive email alerts for important updates</p>
+                  
+                  <Separator />
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Transaction Alerts</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified about important transaction events
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="checkbox" 
+                        id="transaction-alerts" 
+                        className="h-4 w-4 rounded border-gray-300"
+                        defaultChecked
+                      />
+                      <Label htmlFor="transaction-alerts">Enabled</Label>
+                    </div>
                   </div>
-                  <Switch id="email-notifications" defaultChecked />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Two-Factor Authentication</Label>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security to your account</p>
+                  
+                  <Separator />
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Security Alerts</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Receive notifications about security-related events
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="checkbox" 
+                        id="security-alerts" 
+                        className="h-4 w-4 rounded border-gray-300"
+                        defaultChecked
+                      />
+                      <Label htmlFor="security-alerts">Enabled</Label>
+                    </div>
                   </div>
-                  <Switch id="two-factor" />
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Cookie Preferences</Label>
-                    <p className="text-sm text-muted-foreground">Manage how we use cookies on this site</p>
-                  </div>
-                  <Button variant="outline" size="sm">Manage Cookies</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Privacy and Security</CardTitle>
-              <CardDescription>Manage your privacy and security settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Data Sharing</Label>
-                  <p className="text-sm text-muted-foreground">Control how your data is shared with third parties</p>
-                </div>
-                <Switch id="data-sharing" />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Activity Log</Label>
-                  <p className="text-sm text-muted-foreground">View and manage your account activity history</p>
-                </div>
-                <Button variant="outline" size="sm">View Log</Button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Download Your Data</Label>
-                  <p className="text-sm text-muted-foreground">Request a copy of all your personal data</p>
-                </div>
-                <Button variant="outline" size="sm">Request Data</Button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Delete Account</Label>
-                  <p className="text-sm text-muted-foreground text-red-500">Permanently delete your account and all data</p>
-                </div>
-                <Button variant="destructive" size="sm">Delete Account</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
+              </CardContent>
+              <CardFooter>
+                <Button className="gap-2" onClick={() => toast({ title: "Settings saved" })}>
+                  <Bell className="h-4 w-4" />
+                  Save Notification Settings
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

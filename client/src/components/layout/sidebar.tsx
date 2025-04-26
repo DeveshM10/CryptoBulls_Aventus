@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { WalletConnect } from "@/components/wallet/wallet-connect";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, 
   Wallet, 
@@ -24,7 +25,8 @@ import {
   Wrench,
   LogOut,
   User,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
