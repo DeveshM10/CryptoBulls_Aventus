@@ -624,7 +624,7 @@ export default function AssetsPage() {
                       <div className="text-muted-foreground">
                         {assetTypes.find(t => t.value === asset.type)?.label || asset.type}
                       </div>
-                      <div>${Number(asset.value.replace(/[^0-9.-]+/g, '')).toLocaleString()}</div>
+                      <div>₹{Number(asset.value.replace(/[^0-9.-]+/g, '')).toLocaleString()}</div>
                       <div className="text-muted-foreground">{new Date(asset.date).toLocaleDateString()}</div>
                       <div className={asset.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
                         {asset.trend === 'up' ? '+' : '-'}{asset.change}
