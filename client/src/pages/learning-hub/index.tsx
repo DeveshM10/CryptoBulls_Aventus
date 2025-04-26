@@ -37,7 +37,7 @@ const Confetti = ({ isVisible }) => {
     const randomDelay = Math.random() * 2;
     const randomDuration = 1 + Math.random() * 3;
     const randomSize = 5 + Math.random() * 10;
-    
+
     return (
       <span
         key={i}
@@ -113,7 +113,7 @@ const CourseCard = ({
                 </Badge>
               </div>
             )}
-            
+
             {/* Progress overlay */}
             <div className="absolute bottom-0 left-0 right-0 z-20 px-4 py-2">
               <div className="flex items-center justify-between text-white mb-1">
@@ -124,7 +124,7 @@ const CourseCard = ({
             </div>
           </div>
         </div>
-        
+
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="line-clamp-1">{title}</CardTitle>
@@ -134,7 +134,7 @@ const CourseCard = ({
           </div>
           <CardDescription className="line-clamp-2">{description}</CardDescription>
         </CardHeader>
-        
+
         <CardContent className="flex-grow">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center">
@@ -147,7 +147,7 @@ const CourseCard = ({
             </div>
           </div>
         </CardContent>
-        
+
         <CardFooter className="border-t pt-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
@@ -239,7 +239,7 @@ const QuizComponent = () => {
   const handleSubmitAnswer = () => {
     const isCorrect = selectedOption === questions[currentQuestion].correctAnswer;
     setResult({ isCorrect });
-    
+
     if (isCorrect) {
       setScore(prevScore => prevScore + 1);
       setShowConfetti(true);
@@ -250,7 +250,7 @@ const QuizComponent = () => {
   const handleNextQuestion = () => {
     setSelectedOption("");
     setResult(null);
-    
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prevQuestion => prevQuestion + 1);
     } else {
@@ -269,7 +269,7 @@ const QuizComponent = () => {
   return (
     <div className="relative">
       <Confetti isVisible={showConfetti} />
-      
+
       {!quizCompleted ? (
         <Card className="relative">
           <CardHeader>
@@ -288,7 +288,7 @@ const QuizComponent = () => {
                 <h3 className="text-lg font-medium mb-4">
                   {questions[currentQuestion].question}
                 </h3>
-                
+
                 <RadioGroup 
                   value={selectedOption} 
                   className="space-y-3"
@@ -324,7 +324,7 @@ const QuizComponent = () => {
                   ))}
                 </RadioGroup>
               </div>
-              
+
               {result && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -385,14 +385,14 @@ const QuizComponent = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">Quiz Completed!</h3>
                 <p className="text-muted-foreground">
                   You scored {score} out of {questions.length}
                 </p>
               </div>
-              
+
               <div className="w-full max-w-xs mx-auto">
                 <div className="relative pt-4">
                   <Progress value={(score / questions.length) * 100} className="h-3" />
@@ -403,7 +403,7 @@ const QuizComponent = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-2">
                 {score === questions.length ? (
                   <div className="text-primary-600 font-medium flex items-center justify-center gap-2">
@@ -419,7 +419,7 @@ const QuizComponent = () => {
                   </p>
                 )}
               </div>
-              
+
               <div className="pt-2 space-x-3">
                 <Button onClick={resetQuiz}>Try Again</Button>
                 <Button variant="outline">Continue Learning</Button>
@@ -491,7 +491,7 @@ const AchievementBadge = ({ icon, title, description, earned, progress = 100 }) 
       <div className="absolute -top-3 -right-3">
         {earned && <Medal className="h-6 w-6 text-yellow-500 drop-shadow-md" />}
       </div>
-      
+
       <div className={cn(
         "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3",
         earned 
@@ -500,10 +500,10 @@ const AchievementBadge = ({ icon, title, description, earned, progress = 100 }) 
       )}>
         {icon}
       </div>
-      
+
       <h3 className="font-medium">{title}</h3>
       <p className="text-xs text-muted-foreground mt-1">{description}</p>
-      
+
       {!earned && progress > 0 && (
         <div className="mt-3">
           <Progress value={progress} className="h-1.5" />
@@ -519,7 +519,7 @@ const LearningPath = ({ steps }) => {
   return (
     <div className="relative pb-4">
       <div className="absolute left-[1.625rem] top-0 bottom-0 w-0.5 bg-muted-foreground/20" />
-      
+
       {steps.map((step, index) => (
         <div key={index} className="relative z-10 flex gap-4 pb-8">
           <div className={cn(
@@ -536,7 +536,7 @@ const LearningPath = ({ steps }) => {
               <span>{index + 1}</span>
             )}
           </div>
-          
+
           <div className="space-y-1.5">
             <h3 className={cn(
               "font-medium",
@@ -545,7 +545,7 @@ const LearningPath = ({ steps }) => {
               {step.title}
             </h3>
             <p className="text-sm text-muted-foreground">{step.description}</p>
-            
+
             {(step.completed || step.active) && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -566,7 +566,7 @@ const LearningPath = ({ steps }) => {
 // User level and experience progress component
 const UserLevelProgress = ({ level, xp, xpToNextLevel }) => {
   const progress = (xp / xpToNextLevel) * 100;
-  
+
   return (
     <div className="rounded-lg border p-4 bg-gradient-to-br from-primary/5 to-background">
       <div className="flex items-center justify-between">
@@ -579,7 +579,7 @@ const UserLevelProgress = ({ level, xp, xpToNextLevel }) => {
             </Badge>
           </div>
         </div>
-        
+
         <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center relative">
           <GraduationCap className="h-6 w-6 text-primary" />
           <div className="absolute inset-0 rounded-full border-2 border-primary/30" />
@@ -591,7 +591,7 @@ const UserLevelProgress = ({ level, xp, xpToNextLevel }) => {
           />
         </div>
       </div>
-      
+
       <div className="mt-4 space-y-1.5">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Progress to Level {level + 1}</span>
@@ -599,7 +599,7 @@ const UserLevelProgress = ({ level, xp, xpToNextLevel }) => {
         </div>
         <Progress value={progress} className="h-2" />
       </div>
-      
+
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="rounded border p-2.5 text-center">
           <div className="text-sm text-muted-foreground">Courses Completed</div>
@@ -625,7 +625,7 @@ export default function LearningHubPage() {
     blockchain: 0,
     featured: 0
   });
-  
+
   // Simulate progress loading animation on mount
   useEffect(() => {
     const progressTimers = [
@@ -634,10 +634,10 @@ export default function LearningHubPage() {
       setTimeout(() => setProgressValues(prev => ({ ...prev, blockchain: 20 })), 700), 
       setTimeout(() => setProgressValues(prev => ({ ...prev, featured: 60 })), 900)
     ];
-    
+
     return () => progressTimers.forEach(timer => clearTimeout(timer));
   }, []);
-  
+
   // Sample article data
   const articles = [
     {
@@ -669,7 +669,7 @@ export default function LearningHubPage() {
       author: "Robert Nelson"
     }
   ];
-  
+
   // Learning path steps with content
   const investingPathSteps = [
     {
@@ -821,20 +821,19 @@ export default function LearningHubPage() {
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <Card className="bg-gradient-to-br from-primary/30 via-primary/10 to-background overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="relative px-6 py-8 md:p-8">
+                <CardContent className="p-0"><div className="relative px-6 py-8 md:p-8">
                     <div className="flex flex-col md:flex-row gap-6 items-start md:items-center relative z-10">
                       <div className="aspect-square w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
                         <Trophy className="h-8 w-8 text-primary-foreground" />
                       </div>
-                      
+
                       <div className="space-y-1.5 flex-1">
                         <h2 className="text-2xl font-bold">Master Your Finances</h2>
                         <p className="text-primary-foreground/80 max-w-2xl">
                           Continue your journey to financial literacy with our featured course.
                           Complete all modules to earn a certificate.
                         </p>
-                        
+
                         <div className="flex items-center gap-4 mt-3">
                           <div className="flex items-center">
                             <BookOpen className="h-4 w-4 mr-1.5 text-primary-foreground/70" />
@@ -850,7 +849,7 @@ export default function LearningHubPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <motion.div
                           whileHover={{ scale: 1.05 }}
@@ -862,7 +861,7 @@ export default function LearningHubPage() {
                         </motion.div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 md:mt-6">
                       <div className="flex items-center justify-between text-sm mb-1.5">
                         <span className="text-primary-foreground/70">Course progress</span>
@@ -877,7 +876,7 @@ export default function LearningHubPage() {
                         />
                       </div>
                     </div>
-                    
+
                     {/* Background decorative elements */}
                     <div className="absolute right-0 -bottom-6 opacity-20">
                       <svg width="180" height="180" viewBox="0 0 184 184" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -893,7 +892,7 @@ export default function LearningHubPage() {
                 </CardContent>
               </Card>
             </div>
-            
+
             <div className="lg:row-span-2">
               <UserLevelProgress 
                 level={level}
@@ -901,7 +900,7 @@ export default function LearningHubPage() {
                 xpToNextLevel={xpToNextLevel}
               />
             </div>
-            
+
             <div className="lg:col-span-2">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
                 <TabsList className="grid grid-cols-4 h-auto">
@@ -922,7 +921,7 @@ export default function LearningHubPage() {
                     Achievements
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}
@@ -938,7 +937,7 @@ export default function LearningHubPage() {
                         ))}
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="videos" className="m-0">
                       <Card>
                         <CardHeader>
@@ -948,17 +947,17 @@ export default function LearningHubPage() {
                         <CardContent className="space-y-6">
                           <div className="grid gap-6 md:grid-cols-2">
                             <VideoLesson 
-                              videoId="PHe0bXAIuk0" 
-                              title="How The Economic Machine Works" 
-                              description="Ray Dalio explains how the economy works in a simple, mechanical way." 
+                              videoId="Nj8jZGzlT1c"
+                              title="Warren Buffett: How to Invest for Beginners"
+                              description="Learn investment fundamentals from one of the world's greatest investors."
                             />
                             <VideoLesson 
-                              videoId="F3QpgXBtDeo" 
-                              title="The Psychology of Money" 
-                              description="Morgan Housel discusses the strange ways people think about money." 
+                              videoId="pFgPNVytlwA"
+                              title="The Simple Path to Wealth | JL Collins"
+                              description="A straightforward approach to building wealth through index fund investing."
                             />
                           </div>
-                          
+
                           <div className="grid gap-6 md:grid-cols-2">
                             <VideoLesson 
                               videoId="XBWrMfOEhfY" 
@@ -974,11 +973,11 @@ export default function LearningHubPage() {
                         </CardContent>
                       </Card>
                     </TabsContent>
-                    
+
                     <TabsContent value="quizzes" className="m-0">
                       <QuizComponent />
                     </TabsContent>
-                    
+
                     <TabsContent value="achievements" className="m-0">
                       <Card>
                         <CardHeader>
@@ -1014,7 +1013,7 @@ export default function LearningHubPage() {
                               progress={40}
                             />
                           </div>
-                          
+
                           <div className="grid gap-4 md:grid-cols-4 mt-4">
                             <AchievementBadge 
                               icon={<BarChart4 className="h-8 w-8" />}
@@ -1052,7 +1051,7 @@ export default function LearningHubPage() {
                 </AnimatePresence>
               </Tabs>
             </div>
-            
+
             <div className="lg:col-span-3 grid gap-6 md:grid-cols-3">
               <div className="md:col-span-2">
                 <Card>
@@ -1065,7 +1064,7 @@ export default function LearningHubPage() {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <div>
                 <Card>
                   <CardHeader>
