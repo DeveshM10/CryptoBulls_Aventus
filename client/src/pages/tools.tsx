@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillReminderTool } from "@/components/tools/bill-reminder-tool";
-import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal";
-import { VoiceLiabilityModal } from "@/components/voice-input/voice-liability-modal";
+// Voice modals are now integrated directly into asset and liability pages
 import { InterestCalculator } from "@/components/tools/interest-calculator";
 import { EMICalculator } from "@/components/tools/emi-calculator";
 import { TaxCalculator } from "@/components/tools/tax-calculator";
