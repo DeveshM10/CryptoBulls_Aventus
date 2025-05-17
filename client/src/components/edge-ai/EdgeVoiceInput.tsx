@@ -293,8 +293,34 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               const existingItems = JSON.parse(existingItemsStr);
               existingItems.push(result);
               window.localStorage.setItem('edgeai_liabilities', JSON.stringify(existingItems));
-              const event = new CustomEvent('edgeai-liability-added', { detail: result });
-              window.dispatchEvent(event);
+              
+              // Dispatch liability added event
+              const event = new CustomEvent('edgeai-liability-added', { 
+                detail: result,
+                bubbles: true
+              });
+              document.dispatchEvent(event);
+              
+              // Update financial summary directly for immediate UI update
+              try {
+                const liabilityAmount = parseFloat(result.amount.replace(/[^\d.-]/g, '')) || 0;
+                // Dispatch summary update event with the amount to add
+                const summaryEvent = new CustomEvent('edgeai-summary-update', {
+                  detail: { 
+                    type: 'liability',
+                    value: liabilityAmount
+                  },
+                  bubbles: true
+                });
+                document.dispatchEvent(summaryEvent);
+              } catch (error) {
+                console.error('Error updating summary totals:', error);
+              }
+              
+              // Trigger other refresh events
+              window.dispatchEvent(new Event('storage'));
+              document.dispatchEvent(new Event('edgeai-data-changed'));
+              
               success = true;
             }
           }
@@ -311,8 +337,34 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               const existingItems = JSON.parse(existingItemsStr);
               existingItems.push(result);
               window.localStorage.setItem('edgeai_expenses', JSON.stringify(existingItems));
-              const event = new CustomEvent('edgeai-expense-added', { detail: result });
-              window.dispatchEvent(event);
+              
+              // Dispatch expense added event
+              const event = new CustomEvent('edgeai-expense-added', { 
+                detail: result,
+                bubbles: true
+              });
+              document.dispatchEvent(event);
+              
+              // Update financial summary directly for immediate UI update
+              try {
+                const expenseAmount = parseFloat(result.spent.replace(/[^\d.-]/g, '')) || 0;
+                // Dispatch summary update event with the amount to add
+                const summaryEvent = new CustomEvent('edgeai-summary-update', {
+                  detail: { 
+                    type: 'expense',
+                    value: expenseAmount
+                  },
+                  bubbles: true
+                });
+                document.dispatchEvent(summaryEvent);
+              } catch (error) {
+                console.error('Error updating summary totals:', error);
+              }
+              
+              // Trigger other refresh events
+              window.dispatchEvent(new Event('storage'));
+              document.dispatchEvent(new Event('edgeai-data-changed'));
+              
               success = true;
             }
           }
@@ -329,8 +381,34 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               const existingItems = JSON.parse(existingItemsStr);
               existingItems.push(result);
               window.localStorage.setItem('edgeai_income', JSON.stringify(existingItems));
-              const event = new CustomEvent('edgeai-income-added', { detail: result });
-              window.dispatchEvent(event);
+              
+              // Dispatch income added event
+              const event = new CustomEvent('edgeai-income-added', { 
+                detail: result,
+                bubbles: true
+              });
+              document.dispatchEvent(event);
+              
+              // Update financial summary directly for immediate UI update
+              try {
+                const incomeAmount = parseFloat(result.amount.replace(/[^\d.-]/g, '')) || 0;
+                // Dispatch summary update event with the amount to add
+                const summaryEvent = new CustomEvent('edgeai-summary-update', {
+                  detail: { 
+                    type: 'income',
+                    value: incomeAmount
+                  },
+                  bubbles: true
+                });
+                document.dispatchEvent(summaryEvent);
+              } catch (error) {
+                console.error('Error updating summary totals:', error);
+              }
+              
+              // Trigger other refresh events
+              window.dispatchEvent(new Event('storage'));
+              document.dispatchEvent(new Event('edgeai-data-changed'));
+              
               success = true;
             }
           }
