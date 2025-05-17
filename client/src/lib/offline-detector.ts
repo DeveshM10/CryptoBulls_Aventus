@@ -5,6 +5,8 @@
  * to ensure that FinVault works properly without internet access.
  */
 
+import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+
 // Event listeners for online/offline events
 export function setupOfflineDetection(callback: (isOnline: boolean) => void) {
   const handleOnlineStatusChange = () => {
@@ -27,11 +29,11 @@ export function setupOfflineDetection(callback: (isOnline: boolean) => void) {
 
 // React hook for using offline status
 export function useOfflineDetector(): boolean {
-  const [isOnline, setIsOnline] = React.useState<boolean>(
+  const [isOnline, setIsOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     return setupOfflineDetection(setIsOnline);
   }, []);
 
@@ -57,23 +59,27 @@ export async function isResourceAvailableOffline(url: string): Promise<boolean> 
   return true;
 }
 
-// Add this to app context provider
-import React from 'react';
-
-export const OfflineContext = React.createContext<{
+// Create offline context
+interface OfflineContextType {
   isOffline: boolean;
   setOfflineMode: (mode: boolean) => void;
-}>({
+}
+
+export const OfflineContext = createContext<OfflineContextType>({
   isOffline: false,
   setOfflineMode: () => {},
 });
 
-export const OfflineProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [isUserOffline, setIsUserOffline] = React.useState(false);
+interface OfflineProviderProps {
+  children: ReactNode;
+}
+
+export const OfflineProvider: React.FC<OfflineProviderProps> = ({ children }) => {
+  const [isUserOffline, setIsUserOffline] = useState(false);
   const isSystemOffline = typeof navigator !== 'undefined' ? !navigator.onLine : false;
   const isOffline = isUserOffline || isSystemOffline;
 
-  React.useEffect(() => {
+  useEffect(() => {
     return setupOfflineDetection((online) => {
       if (!online && !isUserOffline) {
         console.log('System went offline');
@@ -82,13 +88,15 @@ export const OfflineProvider: React.FC<{children: React.ReactNode}> = ({ childre
   }, [isUserOffline]);
 
   return (
-    <OfflineContext.Provider value={{ 
-      isOffline, 
-      setOfflineMode: setIsUserOffline 
-    }}>
+    <OfflineContext.Provider 
+      value={{ 
+        isOffline, 
+        setOfflineMode: setIsUserOffline 
+      }}
+    >
       {children}
     </OfflineContext.Provider>
   );
 };
 
-export const useOfflineMode = () => React.useContext(OfflineContext);
+export const useOfflineMode = () => useContext(OfflineContext);
