@@ -259,10 +259,154 @@ export default function AssetsPage() {
                 size="sm"
                 className="flex-shrink-0"
                 onClick={() => {
-                  toast({
-                    title: "Voice Input",
-                    description: "Speak clearly and say something like 'I have a stock investment worth 50,000 rupees'",
-                  });
+                  // Create dialog for voice input
+                  const dialog = document.createElement('div');
+                  dialog.style.position = 'fixed';
+                  dialog.style.top = '0';
+                  dialog.style.left = '0';
+                  dialog.style.width = '100%';
+                  dialog.style.height = '100%';
+                  dialog.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                  dialog.style.zIndex = '9999';
+                  dialog.style.display = 'flex';
+                  dialog.style.justifyContent = 'center';
+                  dialog.style.alignItems = 'center';
+                  
+                  // Create modal content
+                  const content = document.createElement('div');
+                  content.style.backgroundColor = '#1e1e2f'; // Dark background
+                  content.style.color = '#fff'; // White text
+                  content.style.borderRadius = '10px';
+                  content.style.padding = '24px';
+                  content.style.width = '80%';
+                  content.style.maxWidth = '500px';
+                  content.style.maxHeight = '80vh';
+                  content.style.overflow = 'auto';
+                  content.style.display = 'flex';
+                  content.style.flexDirection = 'column';
+                  content.style.gap = '15px';
+                  content.style.boxShadow = '0 8px 32px rgba(128, 90, 213, 0.2)'; // Purple glow
+                  
+                  // Title
+                  const title = document.createElement('h3');
+                  title.textContent = 'Voice Input - Add Asset';
+                  title.style.fontSize = '1.5rem';
+                  title.style.fontWeight = 'bold';
+                  title.style.margin = '0';
+                  
+                  // Description
+                  const description = document.createElement('p');
+                  description.textContent = 'Speak clearly and say something like "I have a stock investment worth 50,000 rupees"';
+                  description.style.margin = '0';
+                  
+                  // Status area
+                  const statusArea = document.createElement('div');
+                  statusArea.style.display = 'flex';
+                  statusArea.style.alignItems = 'center';
+                  statusArea.style.justifyContent = 'center';
+                  statusArea.style.padding = '20px';
+                  
+                  // Mic icon
+                  const micIcon = document.createElement('div');
+                  micIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>';
+                  micIcon.style.animation = 'pulse 1.5s infinite';
+                  micIcon.style.color = '#9f7aea'; // Purple color
+                  
+                  // Add style for pulse animation
+                  const style = document.createElement('style');
+                  style.textContent = `
+                    @keyframes pulse {
+                      0% { transform: scale(1); opacity: 1; }
+                      50% { transform: scale(1.1); opacity: 0.8; }
+                      100% { transform: scale(1); opacity: 1; }
+                    }
+                  `;
+                  document.head.appendChild(style);
+                  
+                  // Transcript area
+                  const transcriptArea = document.createElement('div');
+                  transcriptArea.style.border = '1px solid #4b3f72'; // Purple border
+                  transcriptArea.style.borderRadius = '5px';
+                  transcriptArea.style.padding = '10px';
+                  transcriptArea.style.marginTop = '10px';
+                  transcriptArea.style.minHeight = '100px';
+                  transcriptArea.style.display = 'none';
+                  transcriptArea.style.backgroundColor = '#2d2d3f'; // Slightly lighter dark background
+                  
+                  // Button area
+                  const buttonArea = document.createElement('div');
+                  buttonArea.style.display = 'flex';
+                  buttonArea.style.justifyContent = 'space-between';
+                  buttonArea.style.marginTop = '20px';
+                  
+                  // Cancel button
+                  const cancelButton = document.createElement('button');
+                  cancelButton.textContent = 'Cancel';
+                  cancelButton.style.padding = '8px 16px';
+                  cancelButton.style.border = '1px solid #4b3f72';
+                  cancelButton.style.borderRadius = '5px';
+                  cancelButton.style.backgroundColor = '#2d2d3f';
+                  cancelButton.style.color = '#fff';
+                  cancelButton.style.cursor = 'pointer';
+                  cancelButton.style.transition = 'all 0.2s ease';
+                  cancelButton.onmouseover = function() { 
+                    this.style.backgroundColor = '#3d3d4f';
+                  };
+                  cancelButton.onmouseout = function() { 
+                    this.style.backgroundColor = '#2d2d3f';
+                  };
+                  
+                  // Clear button
+                  const clearButton = document.createElement('button');
+                  clearButton.textContent = 'Clear & Retry';
+                  clearButton.style.padding = '8px 16px';
+                  clearButton.style.border = '1px solid #4b3f72';
+                  clearButton.style.borderRadius = '5px';
+                  clearButton.style.backgroundColor = '#2d2d3f';
+                  clearButton.style.color = '#fff';
+                  clearButton.style.cursor = 'pointer';
+                  clearButton.style.display = 'none';
+                  clearButton.style.transition = 'all 0.2s ease';
+                  clearButton.onmouseover = function() { 
+                    this.style.backgroundColor = '#3d3d4f';
+                  };
+                  clearButton.onmouseout = function() { 
+                    this.style.backgroundColor = '#2d2d3f';
+                  };
+                  
+                  // Submit button
+                  const submitButton = document.createElement('button');
+                  submitButton.textContent = 'Add Asset';
+                  submitButton.style.padding = '8px 16px';
+                  submitButton.style.border = 'none';
+                  submitButton.style.borderRadius = '5px';
+                  submitButton.style.backgroundColor = '#9f7aea'; // Purple primary
+                  submitButton.style.color = 'white';
+                  submitButton.style.cursor = 'pointer';
+                  submitButton.style.display = 'none';
+                  submitButton.style.transition = 'all 0.2s ease';
+                  submitButton.onmouseover = function() { 
+                    this.style.backgroundColor = '#805ad5'; // Darker purple on hover
+                  };
+                  submitButton.onmouseout = function() { 
+                    this.style.backgroundColor = '#9f7aea';
+                  };
+                  
+                  // Append elements
+                  statusArea.appendChild(micIcon);
+                  
+                  buttonArea.appendChild(cancelButton);
+                  buttonArea.appendChild(clearButton);
+                  buttonArea.appendChild(submitButton);
+                  
+                  content.appendChild(title);
+                  content.appendChild(description);
+                  content.appendChild(statusArea);
+                  content.appendChild(transcriptArea);
+                  content.appendChild(buttonArea);
+                  
+                  dialog.appendChild(content);
+                  document.body.appendChild(dialog);
                   
                   // Ask for microphone permission
                   navigator.mediaDevices.getUserMedia({ audio: true })
@@ -276,12 +420,76 @@ export default function AssetsPage() {
                         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                         const recognition = new SpeechRecognition();
                         recognition.lang = 'en-US';
-                        recognition.interimResults = false;
+                        recognition.interimResults = true;
                         recognition.maxAlternatives = 1;
                         
+                        let finalTranscript = '';
+                        let isListening = true;
+                        
                         recognition.onresult = function(event: any) {
-                          const transcript = event.results[0][0].transcript;
-                          console.log('Transcript:', transcript);
+                          let interimTranscript = '';
+                          
+                          for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                              finalTranscript += event.results[i][0].transcript;
+                            } else {
+                              interimTranscript += event.results[i][0].transcript;
+                            }
+                          }
+                          
+                          // Show transcript
+                          transcriptArea.style.display = 'block';
+                          transcriptArea.innerHTML = `<strong>You said:</strong> ${finalTranscript}<span style="color: gray;">${interimTranscript}</span>`;
+                          
+                          // Show buttons if we have text
+                          if (finalTranscript || interimTranscript) {
+                            clearButton.style.display = 'block';
+                            submitButton.style.display = 'block';
+                          }
+                        };
+                        
+                        recognition.onerror = function(event: any) {
+                          console.error('Error:', event.error);
+                          statusArea.innerHTML = `<div style="color: red;">Error: ${event.error}</div>`;
+                          isListening = false;
+                          recognition.stop();
+                        };
+                        
+                        recognition.onend = function() {
+                          if (isListening) {
+                            recognition.start();
+                          } else {
+                            micIcon.style.animation = 'none';
+                            micIcon.style.opacity = '0.5';
+                          }
+                        };
+                        
+                        // Start recognition
+                        recognition.start();
+                        
+                        // Cancel button handler
+                        cancelButton.addEventListener('click', function() {
+                          isListening = false;
+                          recognition.stop();
+                          document.body.removeChild(dialog);
+                        });
+                        
+                        // Clear button handler
+                        clearButton.addEventListener('click', function() {
+                          finalTranscript = '';
+                          transcriptArea.innerHTML = '';
+                          clearButton.style.display = 'none';
+                          submitButton.style.display = 'none';
+                        });
+                        
+                        // Submit button handler
+                        submitButton.addEventListener('click', function() {
+                          isListening = false;
+                          recognition.stop();
+                          
+                          // Show processing state
+                          statusArea.innerHTML = '<div>Processing...</div>';
+                          buttonArea.style.display = 'none';
                           
                           // Process the voice input
                           fetch('/api/voice-processor', {
@@ -290,13 +498,22 @@ export default function AssetsPage() {
                               'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                              transcript: transcript,
+                              transcript: finalTranscript,
                               type: 'asset'
                             }),
                           })
                           .then(response => response.json())
                           .then(data => {
                             console.log('Processed data:', data);
+                            
+                            // Show what was understood
+                            statusArea.innerHTML = `
+                              <div style="text-align: left; width: 100%;">
+                                <div><strong>Asset:</strong> ${data.title}</div>
+                                <div><strong>Value:</strong> ${data.value}</div>
+                                <div><strong>Type:</strong> ${data.type}</div>
+                              </div>
+                            `;
                             
                             // Create the new asset
                             fetch('/api/assets', {
@@ -310,61 +527,125 @@ export default function AssetsPage() {
                               // Refresh data
                               queryClient.invalidateQueries({ queryKey: ['/api/assets'] });
                               
-                              toast({
-                                title: "Asset Added",
-                                description: "Your asset has been successfully added via voice input.",
+                              // Show success message in dialog
+                              statusArea.innerHTML += '<div style="color: green; margin-top: 10px;">Asset added successfully!</div>';
+                              
+                              // Add close button
+                              buttonArea.innerHTML = '';
+                              const closeButton = document.createElement('button');
+                              closeButton.textContent = 'Close';
+                              closeButton.style.padding = '8px 16px';
+                              closeButton.style.border = 'none';
+                              closeButton.style.borderRadius = '5px';
+                              closeButton.style.backgroundColor = '#6366F1';
+                              closeButton.style.color = 'white';
+                              closeButton.style.cursor = 'pointer';
+                              
+                              closeButton.addEventListener('click', function() {
+                                document.body.removeChild(dialog);
                               });
+                              
+                              buttonArea.appendChild(closeButton);
+                              buttonArea.style.display = 'flex';
+                              buttonArea.style.justifyContent = 'center';
+                              
+                              // Auto close after 5 seconds
+                              setTimeout(() => {
+                                if (document.body.contains(dialog)) {
+                                  document.body.removeChild(dialog);
+                                }
+                              }, 5000);
                             })
                             .catch(error => {
                               console.error('Error:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to add asset. Please try again.",
-                                variant: "destructive",
+                              statusArea.innerHTML = '<div style="color: red;">Error adding asset. Please try again.</div>';
+                              
+                              // Add retry button
+                              buttonArea.innerHTML = '';
+                              const retryButton = document.createElement('button');
+                              retryButton.textContent = 'Retry';
+                              retryButton.style.padding = '8px 16px';
+                              retryButton.style.border = 'none';
+                              retryButton.style.borderRadius = '5px';
+                              retryButton.style.backgroundColor = '#6366F1';
+                              retryButton.style.color = 'white';
+                              retryButton.style.cursor = 'pointer';
+                              
+                              retryButton.addEventListener('click', function() {
+                                document.body.removeChild(dialog);
                               });
+                              
+                              buttonArea.appendChild(retryButton);
+                              buttonArea.style.display = 'flex';
+                              buttonArea.style.justifyContent = 'center';
                             });
                           })
                           .catch(error => {
                             console.error('Error:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to process voice input. Please try again.",
-                              variant: "destructive",
+                            statusArea.innerHTML = '<div style="color: red;">Error processing voice input. Please try again.</div>';
+                            
+                            // Add retry button
+                            buttonArea.innerHTML = '';
+                            const retryButton = document.createElement('button');
+                            retryButton.textContent = 'Retry';
+                            retryButton.style.padding = '8px 16px';
+                            retryButton.style.border = 'none';
+                            retryButton.style.borderRadius = '5px';
+                            retryButton.style.backgroundColor = '#6366F1';
+                            retryButton.style.color = 'white';
+                            retryButton.style.cursor = 'pointer';
+                            
+                            retryButton.addEventListener('click', function() {
+                              document.body.removeChild(dialog);
                             });
+                            
+                            buttonArea.appendChild(retryButton);
+                            buttonArea.style.display = 'flex';
+                            buttonArea.style.justifyContent = 'center';
                           });
-                        };
-                        
-                        recognition.onerror = function(event: any) {
-                          console.error('Error:', event.error);
-                          toast({
-                            title: "Error",
-                            description: `Recognition error: ${event.error}`,
-                            variant: "destructive",
-                          });
-                        };
-                        
-                        // Start recognition
-                        recognition.start();
-                        
-                        toast({
-                          title: "Listening...",
-                          description: "Speak now to add an asset.",
                         });
+                        
                       } catch (error) {
                         console.error('Error:', error);
-                        toast({
-                          title: "Error",
-                          description: "Speech recognition is not supported in your browser.",
-                          variant: "destructive",
+                        statusArea.innerHTML = '<div style="color: red;">Speech recognition is not supported in your browser.</div>';
+                        
+                        // Add close button
+                        buttonArea.innerHTML = '';
+                        const closeButton = document.createElement('button');
+                        closeButton.textContent = 'Close';
+                        closeButton.style.padding = '8px 16px';
+                        closeButton.style.border = 'none';
+                        closeButton.style.borderRadius = '5px';
+                        closeButton.style.backgroundColor = '#6366F1';
+                        closeButton.style.color = 'white';
+                        closeButton.style.cursor = 'pointer';
+                        
+                        closeButton.addEventListener('click', function() {
+                          document.body.removeChild(dialog);
                         });
+                        
+                        buttonArea.appendChild(closeButton);
                       }
                     })
                     .catch(function(err) {
-                      toast({
-                        title: "Microphone Access Denied",
-                        description: "Please allow microphone access to use voice input.",
-                        variant: "destructive",
+                      statusArea.innerHTML = '<div style="color: red;">Microphone access denied. Please allow microphone access to use voice input.</div>';
+                      
+                      // Add close button
+                      buttonArea.innerHTML = '';
+                      const closeButton = document.createElement('button');
+                      closeButton.textContent = 'Close';
+                      closeButton.style.padding = '8px 16px';
+                      closeButton.style.border = 'none';
+                      closeButton.style.borderRadius = '5px';
+                      closeButton.style.backgroundColor = '#6366F1';
+                      closeButton.style.color = 'white';
+                      closeButton.style.cursor = 'pointer';
+                      
+                      closeButton.addEventListener('click', function() {
+                        document.body.removeChild(dialog);
                       });
+                      
+                      buttonArea.appendChild(closeButton);
                     });
                 }}
               >
