@@ -168,7 +168,7 @@ export function useOfflineFeatures() {
 function OfflineAlert() {
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80">
-      <Alert variant="warning" className="bg-amber-50 border-amber-200">
+      <Alert className="bg-amber-50 border-amber-200">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertTitle className="text-amber-800">Offline Mode</AlertTitle>
         <AlertDescription className="flex items-center gap-2 text-amber-700">

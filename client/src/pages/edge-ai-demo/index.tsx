@@ -69,6 +69,77 @@ export default function EdgeAIDemoPage() {
       setExpenses(getExpenses());
       setIncome(getIncome());
       setSummary(getFinancialSummary());
+      
+      // Also check localStorage backup for any items saved there
+      try {
+        const localAssets = window.localStorage.getItem('edgeai_assets');
+        if (localAssets) {
+          const parsedAssets = JSON.parse(localAssets);
+          if (parsedAssets && parsedAssets.length > 0) {
+            // Combine with existing assets, avoiding duplicates
+            setAssets(prevAssets => {
+              const combinedAssets = [...prevAssets];
+              parsedAssets.forEach(asset => {
+                // Only add if not already in the array
+                if (!combinedAssets.some(a => a.id === asset.id)) {
+                  combinedAssets.push(asset);
+                }
+              });
+              return combinedAssets;
+            });
+          }
+        }
+        
+        const localLiabilities = window.localStorage.getItem('edgeai_liabilities');
+        if (localLiabilities) {
+          const parsedItems = JSON.parse(localLiabilities);
+          if (parsedItems && parsedItems.length > 0) {
+            setLiabilities(prevItems => {
+              const combined = [...prevItems];
+              parsedItems.forEach(item => {
+                if (!combined.some(i => i.id === item.id)) {
+                  combined.push(item);
+                }
+              });
+              return combined;
+            });
+          }
+        }
+        
+        const localExpenses = window.localStorage.getItem('edgeai_expenses');
+        if (localExpenses) {
+          const parsedItems = JSON.parse(localExpenses);
+          if (parsedItems && parsedItems.length > 0) {
+            setExpenses(prevItems => {
+              const combined = [...prevItems];
+              parsedItems.forEach(item => {
+                if (!combined.some(i => i.id === item.id)) {
+                  combined.push(item);
+                }
+              });
+              return combined;
+            });
+          }
+        }
+        
+        const localIncome = window.localStorage.getItem('edgeai_income');
+        if (localIncome) {
+          const parsedItems = JSON.parse(localIncome);
+          if (parsedItems && parsedItems.length > 0) {
+            setIncome(prevItems => {
+              const combined = [...prevItems];
+              parsedItems.forEach(item => {
+                if (!combined.some(i => i.id === item.id)) {
+                  combined.push(item);
+                }
+              });
+              return combined;
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error loading local backup data:', err);
+      }
     }
   }, [isInitialized]);
   

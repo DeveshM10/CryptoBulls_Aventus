@@ -208,36 +208,109 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
     
     try {
       // Save to IndexedDB based on type
+      let success = false;
+      
       switch (type) {
         case 'asset':
-          await addAsset(result);
+          // Also save to localStorage as backup in case IndexedDB fails
+          try {
+            // First attempt to save to IndexedDB
+            await addAsset(result);
+            success = true;
+          } catch (err) {
+            console.error('IndexedDB save failed, using backup method:', err);
+            // Fallback: Save to local memory cache and trigger UI update directly
+            if (window.localStorage) {
+              // Get existing assets from localStorage if any
+              const existingAssetsStr = window.localStorage.getItem('edgeai_assets') || '[]';
+              const existingAssets = JSON.parse(existingAssetsStr);
+              
+              // Add new asset to array
+              existingAssets.push(result);
+              
+              // Save back to localStorage
+              window.localStorage.setItem('edgeai_assets', JSON.stringify(existingAssets));
+              
+              // Manually update the UI by triggering the data-updated event
+              const event = new CustomEvent('edgeai-asset-added', { detail: result });
+              window.dispatchEvent(event);
+              
+              success = true;
+            }
+          }
           break;
           
         case 'liability':
-          await addLiability(result);
+          try {
+            await addLiability(result);
+            success = true;
+          } catch (err) {
+            console.error('IndexedDB save failed, using backup method:', err);
+            if (window.localStorage) {
+              const existingItemsStr = window.localStorage.getItem('edgeai_liabilities') || '[]';
+              const existingItems = JSON.parse(existingItemsStr);
+              existingItems.push(result);
+              window.localStorage.setItem('edgeai_liabilities', JSON.stringify(existingItems));
+              const event = new CustomEvent('edgeai-liability-added', { detail: result });
+              window.dispatchEvent(event);
+              success = true;
+            }
+          }
           break;
           
         case 'expense':
-          await addExpense(result);
+          try {
+            await addExpense(result);
+            success = true;
+          } catch (err) {
+            console.error('IndexedDB save failed, using backup method:', err);
+            if (window.localStorage) {
+              const existingItemsStr = window.localStorage.getItem('edgeai_expenses') || '[]';
+              const existingItems = JSON.parse(existingItemsStr);
+              existingItems.push(result);
+              window.localStorage.setItem('edgeai_expenses', JSON.stringify(existingItems));
+              const event = new CustomEvent('edgeai-expense-added', { detail: result });
+              window.dispatchEvent(event);
+              success = true;
+            }
+          }
           break;
           
         case 'income':
-          await addIncome(result);
+          try {
+            await addIncome(result);
+            success = true;
+          } catch (err) {
+            console.error('IndexedDB save failed, using backup method:', err);
+            if (window.localStorage) {
+              const existingItemsStr = window.localStorage.getItem('edgeai_income') || '[]';
+              const existingItems = JSON.parse(existingItemsStr);
+              existingItems.push(result);
+              window.localStorage.setItem('edgeai_income', JSON.stringify(existingItems));
+              const event = new CustomEvent('edgeai-income-added', { detail: result });
+              window.dispatchEvent(event);
+              success = true;
+            }
+          }
           break;
       }
       
-      // Close dialog
-      setIsOpen(false);
-      
-      // Notify success
-      toast({
-        title: 'Success',
-        description: `Your ${type} has been added successfully.`,
-      });
-      
-      // Call success callback
-      if (onSuccess) {
-        onSuccess();
+      if (success) {
+        // Close dialog
+        setIsOpen(false);
+        
+        // Notify success
+        toast({
+          title: 'Success',
+          description: `Your ${type} has been added successfully.`,
+        });
+        
+        // Force refresh the UI by calling the success callback
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        throw new Error('Failed to save data using both primary and backup methods');
       }
     } catch (error) {
       console.error(`Error saving ${type}:`, error);
