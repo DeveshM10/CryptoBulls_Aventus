@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useEdgeAI } from './EdgeAIProvider';
+import { addToSyncQueue } from '../../lib/edge-ai/sync-manager';
 import { Textarea } from '@/components/ui/textarea';
 
 interface EdgeVoiceInputProps {
@@ -230,6 +231,13 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               
               // Save back to localStorage
               window.localStorage.setItem('edgeai_assets', JSON.stringify(existingAssets));
+              
+              // Add to sync queue for later synchronization to MongoDB when online
+              if (isOffline) {
+                // This ensures when connection is restored, item will be synced to MongoDB
+                addToSyncQueue('assets', result);
+                console.log('Asset added to sync queue for later upload to server');
+              }
               
               // Dispatch a custom event to ensure the UI updates immediately
               // This is especially important when working offline

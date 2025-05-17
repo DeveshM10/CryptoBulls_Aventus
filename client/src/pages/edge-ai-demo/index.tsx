@@ -41,7 +41,7 @@ import { Asset, Liability, Expense, Income } from '../../types/finance';
 
 export default function EdgeAIDemoPage() {
   const [activeTab, setActiveTab] = useState('assets');
-  const { isInitialized, isOffline } = useEdgeAI();
+  const { isInitialized, isOffline, hasPendingSync, triggerSync } = useEdgeAI();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [liabilities, setLiabilities] = useState<Liability[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -299,19 +299,34 @@ export default function EdgeAIDemoPage() {
                 <span>Refresh</span>
               </Button>
               
-              <span className="flex items-center gap-1 text-sm">
-                {isOffline ? (
-                  <>
-                    <WifiOff className="h-3.5 w-3.5 text-yellow-500" />
-                    <span className="text-yellow-600">Offline</span>
-                  </>
-                ) : (
-                  <>
-                    <Wifi className="h-3.5 w-3.5 text-green-500" />
-                    <span className="text-green-600">Online</span>
-                  </>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-sm">
+                  {isOffline ? (
+                    <>
+                      <WifiOff className="h-3.5 w-3.5 text-yellow-500" />
+                      <span className="text-yellow-600">Offline</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wifi className="h-3.5 w-3.5 text-green-500" />
+                      <span className="text-green-600">Online</span>
+                    </>
+                  )}
+                </span>
+                
+                {/* Sync button - only shown when online and there's pending data */}
+                {!isOffline && hasPendingSync && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" 
+                    onClick={triggerSync}
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    <span>Sync</span>
+                  </Button>
                 )}
-              </span>
+              </div>
             </div>
           </div>
           
