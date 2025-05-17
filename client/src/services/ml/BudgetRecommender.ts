@@ -341,10 +341,9 @@ export class BudgetRecommender {
     const today = new Date();
     const dayOfWeek = today.getDay();
     const month = today.getMonth();
-    // Get the seasonal factors with proper type safety
-    const dayFactor = this.seasonalityFactors.dayOfWeek[dayOfWeek] || 1.0;
-    const monthFactor = this.seasonalityFactors.month[month] || 1.0;
-    const seasonalFactor = (dayFactor + monthFactor) / 2;
+    const seasonalFactor = 
+      (this.seasonalityFactors.dayOfWeek[dayOfWeek] + 
+      this.seasonalityFactors.month[month]) / 2;
     
     // Predict next week total with trend and seasonality
     const nextWeekForecast = weeklyAverage * (1 + this.weeklyTrend) * seasonalFactor;
