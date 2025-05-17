@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Mic } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -74,6 +74,20 @@ export function LiabilityManagement() {
         
         <div className="flex space-x-2">
           <VoiceLiabilityModal onAddLiability={handleAddLiability} />
+          
+          <Button 
+            variant="outline"
+            className="gap-2 flex items-center"
+            onClick={() => {
+              const voiceButton = document.querySelector('[aria-label="Add liability with voice"]') as HTMLButtonElement;
+              if (voiceButton) {
+                voiceButton.click();
+              }
+            }}
+          >
+            <Mic className="h-4 w-4" />
+            Voice Input
+          </Button>
           
           <Button onClick={() => setShowAddForm(!showAddForm)}>
             {showAddForm ? "Cancel" : 
