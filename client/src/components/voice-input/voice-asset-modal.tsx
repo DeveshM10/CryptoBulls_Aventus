@@ -139,8 +139,18 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
                 </p>
                 
                 {currentTranscript && (
-                  <div className="mt-2 p-3 border rounded-md bg-muted/30 w-full">
-                    <p className="text-sm">{currentTranscript}</p>
+                  <div className="mt-2">
+                    <div className="p-3 border rounded-md bg-muted/30 w-full">
+                      <p className="text-sm">{currentTranscript}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => setCurrentTranscript("")}
+                    >
+                      Clear
+                    </Button>
                   </div>
                 )}
               </div>
