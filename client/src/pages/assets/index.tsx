@@ -1,7 +1,8 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Plus, TrendingUp, ArrowUpRight, Filter, Download } from "lucide-react";
+import { Wallet, Plus, TrendingUp, ArrowUpRight, Filter, Download, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -77,6 +78,7 @@ const CustomTooltip = ({ active, payload, formatter }: any) => {
 export default function AssetsPage() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   
   // Set up form
   const form = useForm<AssetFormValues>({
@@ -240,6 +242,15 @@ export default function AssetsPage() {
               <Button variant="outline" size="sm" className="flex-shrink-0">
                 <Download className="mr-2 h-4 w-4" />
                 <span className="whitespace-nowrap">Export</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-shrink-0"
+                onClick={() => setVoiceModalOpen(true)}
+              >
+                <Mic className="mr-2 h-4 w-4" />
+                <span className="whitespace-nowrap">Voice Input</span>
               </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
