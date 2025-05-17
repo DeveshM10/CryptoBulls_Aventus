@@ -20,7 +20,9 @@ interface EdgeAIContextType {
 
 const EdgeAIContext = createContext<EdgeAIContextType>({
   isInitialized: false,
-  isOffline: false
+  isOffline: false,
+  hasPendingSync: false,
+  triggerSync: async () => {}
 });
 
 interface EdgeAIProviderProps {
@@ -30,6 +32,7 @@ interface EdgeAIProviderProps {
 export function EdgeAIProvider({ children }: EdgeAIProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [hasPendingSync, setHasPendingSync] = useState(false);
   const { toast } = useToast();
   
   // Initialize Edge AI on component mount
@@ -71,37 +74,115 @@ export function EdgeAIProvider({ children }: EdgeAIProviderProps) {
     initializeEdgeAI();
   }, [toast]);
   
-  // Listen for online/offline events
+  // Listen for online/offline events and setup sync
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline(false);
-      toast({
-        title: 'You\'re Back Online',
-        description: 'FinVault is now connected to the network.',
-      });
+    // Check for pending sync items
+    const checkSyncStatus = () => {
+      const hasPending = hasPendingSyncItems();
+      setHasPendingSync(hasPending);
+      return hasPending;
     };
     
+    // Run initial check
+    checkSyncStatus();
+    
+    // Handle coming back online
+    const handleOnline = async () => {
+      setIsOffline(false);
+      
+      // Check if we have pending sync items
+      if (checkSyncStatus()) {
+        toast({
+          title: 'You\'re Back Online',
+          description: 'FinVault is syncing your offline changes to the server.',
+        });
+        
+        // Sync will happen automatically through the sync listener
+      } else {
+        toast({
+          title: 'You\'re Back Online',
+          description: 'FinVault is now connected to the network.',
+        });
+      }
+    };
+    
+    // Handle going offline
     const handleOffline = () => {
       setIsOffline(true);
       toast({
         title: 'Offline Mode Activated',
-        description: 'FinVault is now running in offline mode. All features will continue to work locally.',
+        description: 'Your changes will be saved locally and synced when you reconnect.',
       });
     };
     
+    // Set up sync listener (this automatically syncs when coming online)
+    const cleanupSyncListener = setupSyncListener();
+    
+    // Check for unsynced data periodically
+    const syncInterval = setInterval(() => {
+      if (navigator.onLine) {
+        checkForUnsyncedData().then(() => {
+          checkSyncStatus();
+        });
+      }
+    }, 60000); // Check every minute
+    
+    // Set up event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
+    // Cleanup on unmount
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      cleanupSyncListener();
+      clearInterval(syncInterval);
     };
   }, [toast]);
   
+  // Function to manually trigger sync
+  const triggerSync = async () => {
+    if (!navigator.onLine) {
+      toast({
+        title: 'Cannot Sync',
+        description: 'You are currently offline. Changes will be synced automatically when you reconnect.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    toast({
+      title: 'Syncing Data...',
+      description: 'Uploading your local changes to the server.'
+    });
+    
+    try {
+      const result = await checkForUnsyncedData();
+      setHasPendingSync(hasPendingSyncItems());
+      
+      toast({
+        title: 'Sync Complete',
+        description: 'Your changes have been uploaded to the server.'
+      });
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast({
+        title: 'Sync Failed',
+        description: 'There was a problem syncing your data. Will retry automatically.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
-    <EdgeAIContext.Provider value={{ isInitialized, isOffline }}>
+    <EdgeAIContext.Provider value={{ 
+      isInitialized, 
+      isOffline, 
+      hasPendingSync, 
+      triggerSync 
+    }}>
       {children}
-      {isOffline && <OfflineIndicator />}
+      {isOffline && <OfflineIndicator hasPendingChanges={hasPendingSync} />}
     </EdgeAIContext.Provider>
   );
 }
@@ -116,11 +197,16 @@ export function useEdgeAI() {
 /**
  * Offline status indicator
  */
-function OfflineIndicator() {
+function OfflineIndicator({ hasPendingChanges = false }: { hasPendingChanges?: boolean }) {
   return (
     <div className="fixed bottom-4 left-4 z-50 rounded-md bg-yellow-100 border border-yellow-300 p-2 px-3 text-sm flex items-center gap-2 text-yellow-800 shadow-md">
-      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-      <span>Offline Mode</span>
+      <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+      <span>
+        Offline Mode
+        {hasPendingChanges && (
+          <span className="ml-1 text-xs opacity-80">• Changes will sync when online</span>
+        )}
+      </span>
     </div>
   );
 }
