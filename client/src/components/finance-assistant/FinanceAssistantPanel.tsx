@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AlertCircle, TrendingDown, TrendingUp, Trophy, Lightbulb, ChevronRight, ArrowRight } from "lucide-react";
 import { financeAssistant, FinanceInsight } from "../../lib/finance-ai";
-import { useFinanceStore } from "../../store/finance-store";
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -20,52 +20,163 @@ export function FinanceAssistantPanel() {
   const [healthScore, setHealthScore] = useState(0);
   const [activeTab, setActiveTab] = useState("insights");
   const [isLoading, setIsLoading] = useState(true);
+  const [personalizedTips, setPersonalizedTips] = useState<FinanceInsight[]>([]);
   
-  const {
-    dailyExpenses,
-    expenses,
-    assets,
-    liabilities,
-    incomes,
-    getTotalAssets,
-    getTotalLiabilities,
-    getTotalIncome,
-  } = useFinanceStore();
+  // Fetch assets from API
+  const { data: assetsData, isLoading: isLoadingAssets } = useQuery({
+    queryKey: ['/api/assets'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
+  });
+
+  // Fetch liabilities from API
+  const { data: liabilitiesData, isLoading: isLoadingLiabilities } = useQuery({
+    queryKey: ['/api/liabilities'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
+  });
+
+  // Fetch budget/expenses from API
+  const { data: budgetData, isLoading: isLoadingBudget } = useQuery({
+    queryKey: ['/api/budget'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
+  });
+
+  // Fetch daily expenses from API
+  const { data: dailyExpensesData, isLoading: isLoadingDailyExpenses } = useQuery({
+    queryKey: ['/api/daily-expenses'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
+  });
+
+  // Fetch income data from API
+  const { data: incomeData, isLoading: isLoadingIncome } = useQuery({
+    queryKey: ['/api/income'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
+  });
   
   // Generate insights when data changes
   useEffect(() => {
-    // Simulate loading to give a more realistic experience
-    setIsLoading(true);
+    if (isLoadingAssets || isLoadingLiabilities || isLoadingBudget || isLoadingDailyExpenses || isLoadingIncome) {
+      setIsLoading(true);
+      return;
+    }
     
-    // Use setTimeout to make it feel like AI processing is happening
-    // In a real app, this would be an actual ML inference call
+    // Use a small timeout to allow the AI to process the data
+    // This simulates the time it would take to process with TensorFlow.js or similar
     const timer = setTimeout(() => {
-      // Get insights from our AI assistant
-      const newInsights = financeAssistant.getAllInsights(dailyExpenses, expenses);
-      setInsights(newInsights);
-      
-      // Calculate financial health score
-      const score = financeAssistant.calculateFinancialHealthScore(
-        dailyExpenses,
-        expenses,
-        getTotalIncome(),
-        getTotalAssets(),
-        getTotalLiabilities()
-      );
-      setHealthScore(score);
-      
-      setIsLoading(false);
+      try {
+        // Use the data from API or fallback to empty arrays if not available (for offline support)
+        const assets = assetsData || [];
+        const liabilities = liabilitiesData || [];
+        const expenses = budgetData || [];
+        const dailyExpenses = dailyExpensesData || [];
+        const incomes = incomeData || [];
+        
+        // Save data for offline use
+        localStorage.setItem('finvault_cached_assets', JSON.stringify(assets));
+        localStorage.setItem('finvault_cached_liabilities', JSON.stringify(liabilities));
+        localStorage.setItem('finvault_cached_expenses', JSON.stringify(expenses));
+        localStorage.setItem('finvault_cached_daily_expenses', JSON.stringify(dailyExpenses));
+        localStorage.setItem('finvault_cached_income', JSON.stringify(incomes));
+        
+        // Calculate financial summary
+        const totalAssets = assets.reduce((sum: number, asset: any) => 
+          sum + (parseFloat(asset.value) || 0), 0);
+          
+        const totalLiabilities = liabilities.reduce((sum: number, liability: any) => 
+          sum + (parseFloat(liability.amount) || 0), 0);
+          
+        const totalIncome = incomes.reduce((sum: number, income: any) => 
+          sum + (parseFloat(income.amount) || 0), 0);
+        
+        // Get insights from our AI assistant
+        const newInsights = financeAssistant.getAllInsights(dailyExpenses, expenses);
+        setInsights(newInsights);
+        
+        // Calculate financial health score
+        const score = financeAssistant.calculateFinancialHealthScore(
+          dailyExpenses,
+          expenses,
+          totalIncome,
+          totalAssets,
+          totalLiabilities
+        );
+        setHealthScore(score);
+        
+        // Generate personalized tips
+        const tips = financeAssistant.getPersonalizedTips(
+          dailyExpenses,
+          assets,
+          liabilities
+        );
+        setPersonalizedTips(tips);
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error processing financial data:", error);
+        
+        // Try to use cached data for offline functionality
+        try {
+          const cachedAssets = JSON.parse(localStorage.getItem('finvault_cached_assets') || '[]');
+          const cachedLiabilities = JSON.parse(localStorage.getItem('finvault_cached_liabilities') || '[]');
+          const cachedExpenses = JSON.parse(localStorage.getItem('finvault_cached_expenses') || '[]');
+          const cachedDailyExpenses = JSON.parse(localStorage.getItem('finvault_cached_daily_expenses') || '[]');
+          const cachedIncome = JSON.parse(localStorage.getItem('finvault_cached_income') || '[]');
+          
+          // Calculate financial summary from cached data
+          const totalAssets = cachedAssets.reduce((sum: number, asset: any) => 
+            sum + (parseFloat(asset.value) || 0), 0);
+            
+          const totalLiabilities = cachedLiabilities.reduce((sum: number, liability: any) => 
+            sum + (parseFloat(liability.amount) || 0), 0);
+            
+          const totalIncome = cachedIncome.reduce((sum: number, income: any) => 
+            sum + (parseFloat(income.amount) || 0), 0);
+          
+          // Process cached data with the AI assistant
+          const newInsights = financeAssistant.getAllInsights(cachedDailyExpenses, cachedExpenses);
+          setInsights(newInsights);
+          
+          const score = financeAssistant.calculateFinancialHealthScore(
+            cachedDailyExpenses,
+            cachedExpenses,
+            totalIncome,
+            totalAssets,
+            totalLiabilities
+          );
+          setHealthScore(score);
+          
+          const tips = financeAssistant.getPersonalizedTips(
+            cachedDailyExpenses,
+            cachedAssets,
+            cachedLiabilities
+          );
+          setPersonalizedTips(tips);
+          
+          setIsLoading(false);
+        } catch (cacheError) {
+          console.error("Error retrieving cached data:", cacheError);
+          setIsLoading(false);
+        }
+      }
     }, 1500);
     
     return () => clearTimeout(timer);
-  }, [dailyExpenses, expenses, assets, liabilities, incomes]);
-  
-  // Get personalized tips
-  const personalizedTips = financeAssistant.getPersonalizedTips(
-    dailyExpenses,
-    assets,
-    liabilities
-  );
+  }, [
+    assetsData, 
+    liabilitiesData, 
+    budgetData, 
+    dailyExpensesData, 
+    incomeData,
+    isLoadingAssets,
+    isLoadingLiabilities,
+    isLoadingBudget,
+    isLoadingDailyExpenses,
+    isLoadingIncome
+  ]);
   
   // Determine health score status and color
   const getHealthScoreStatus = () => {
