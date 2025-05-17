@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { AddAssetForm } from "./add-asset-form"
+import { VoiceAssetModal } from "../voice-input/voice-asset-modal"
 import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
 import { Asset } from "@shared/schema"
@@ -13,7 +14,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export function AssetManagement() {
   const [showAddForm, setShowAddForm] = useState(false)
-  const [showVoiceInput, setShowVoiceInput] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   
@@ -48,14 +48,6 @@ export function AssetManagement() {
     }
   }
 
-  const handleVoiceInput = () => {
-    setShowVoiceInput(true)
-    toast({
-      title: "Voice Input",
-      description: "Voice input for assets is now available! Try saying: 'I have a stock investment worth 50,000 rupees with 5% growth'",
-    })
-  }
-
   return (
     <Tabs defaultValue="all" className="w-full">
       <div className="flex items-center justify-between mb-4">
@@ -75,14 +67,7 @@ export function AssetManagement() {
             </>}
           </Button>
           
-          <Button 
-            variant="default"
-            className="flex items-center gap-2"
-            onClick={handleVoiceInput}
-          >
-            <Mic className="h-4 w-4" />
-            Voice Input
-          </Button>
+          <VoiceAssetModal onAddAsset={handleAddAsset} />
         </div>
       </div>
       

@@ -75,19 +75,6 @@ export function LiabilityManagement() {
         <div className="flex space-x-2">
           <VoiceLiabilityModal onAddLiability={handleAddLiability} />
           
-          <Button 
-            onClick={() => {
-              const voiceButton = document.querySelector('[aria-label="Add liability with voice"]') as HTMLButtonElement;
-              if (voiceButton) {
-                voiceButton.click();
-              }
-            }}
-            variant="outline" 
-            className="bg-primary/10 hover:bg-primary/20"
-          >
-            <Mic className="h-4 w-4 text-primary" />
-          </Button>
-          
           <Button onClick={() => setShowAddForm(!showAddForm)}>
             {showAddForm ? "Cancel" : 
             <>
