@@ -178,7 +178,6 @@ export function VoiceFinanceAssistant({ onQueryResult }: VoiceFinanceAssistantPr
                     size="lg"
                     variant="outline"
                     className="h-16 w-16 rounded-full bg-primary/5 relative"
-                    onClick={handleStopListening}
                   >
                     <Mic className="h-6 w-6 text-primary" />
                   </Button>
@@ -186,19 +185,34 @@ export function VoiceFinanceAssistant({ onQueryResult }: VoiceFinanceAssistantPr
               </div>
               
               <div className="text-center mb-4">
-                <p className="text-sm text-muted-foreground">Listening... Speak clearly.</p>
+                <p className="text-sm text-muted-foreground">Listening... Speak clearly, then press "Done Speaking" when finished.</p>
               </div>
               
               {transcript && (
-                <div className="p-3 border rounded-lg bg-muted/30 w-full">
+                <div className="p-3 border rounded-lg bg-muted/30 w-full mb-4">
                   <p className="text-sm">{transcript}</p>
                 </div>
               )}
               
-              <div className="flex justify-center mt-4">
-                <Button variant="outline" onClick={handleStopListening}>
+              <div className="flex justify-center gap-3 mt-4">
+                <Button 
+                  onClick={handleStopListening} 
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4"
+                >
+                  <span className="mr-2">✓</span>
+                  Done Speaking
+                </Button>
+                
+                <Button variant="outline" onClick={() => {
+                  setIsListening(false);
+                  setTranscript("");
+                  
+                  if (recognitionRef.current) {
+                    recognitionRef.current.stop();
+                  }
+                }}>
                   <MicOff className="mr-2 h-4 w-4" />
-                  Stop Listening
+                  Cancel
                 </Button>
               </div>
             </div>
