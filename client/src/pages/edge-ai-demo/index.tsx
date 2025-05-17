@@ -148,27 +148,151 @@ export default function EdgeAIDemoPage() {
     if (!isInitialized) return;
     
     // Create event subscriptions for real-time updates
-    const unsubscribeAssets = subscribe(EVENTS.ASSET_ADDED, () => {
-      setAssets(getAssets());
-      setSummary(getFinancialSummary());
+    const unsubscribeAssets = subscribe(EVENTS.ASSET_ADDED, (asset: Asset) => {
+      // Directly add the new item to the assets array
+      setAssets(prev => [...prev, asset]);
+      // Recalculate summary
+      setSummary(prev => {
+        const assetValue = parseFloat(asset.value.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalAssets: prev.totalAssets + assetValue,
+          netWorth: prev.netWorth + assetValue
+        };
+      });
     });
     
-    const unsubscribeLiabilities = subscribe(EVENTS.LIABILITY_ADDED, () => {
-      setLiabilities(getLiabilities());
-      setSummary(getFinancialSummary());
+    const unsubscribeLiabilities = subscribe(EVENTS.LIABILITY_ADDED, (liability: Liability) => {
+      // Directly add the new item to the array
+      setLiabilities(prev => [...prev, liability]);
+      // Recalculate summary
+      setSummary(prev => {
+        const liabilityAmount = parseFloat(liability.amount.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalLiabilities: prev.totalLiabilities + liabilityAmount,
+          netWorth: prev.netWorth - liabilityAmount
+        };
+      });
     });
     
-    const unsubscribeExpenses = subscribe(EVENTS.EXPENSE_ADDED, () => {
-      setExpenses(getExpenses());
-      setSummary(getFinancialSummary());
+    const unsubscribeExpenses = subscribe(EVENTS.EXPENSE_ADDED, (expense: Expense) => {
+      // Directly add the new item to the array
+      setExpenses(prev => [...prev, expense]);
+      // Recalculate summary
+      setSummary(prev => {
+        const expenseSpent = parseFloat(expense.spent.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalExpenses: prev.totalExpenses + expenseSpent,
+          cashFlow: prev.totalIncome - (prev.totalExpenses + expenseSpent)
+        };
+      });
     });
     
-    const unsubscribeIncome = subscribe(EVENTS.INCOME_ADDED, () => {
-      setIncome(getIncome());
-      setSummary(getFinancialSummary());
+    const unsubscribeIncome = subscribe(EVENTS.INCOME_ADDED, (income: Income) => {
+      // Directly add the new item to the array
+      setIncome(prev => [...prev, income]);
+      // Recalculate summary
+      setSummary(prev => {
+        const incomeAmount = parseFloat(income.amount.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalIncome: prev.totalIncome + incomeAmount,
+          cashFlow: (prev.totalIncome + incomeAmount) - prev.totalExpenses
+        };
+      });
     });
     
-    // Global data update subscription
+    // Listen for custom events from localStorage fallback
+    const handleAssetAddedEvent = (e: CustomEvent) => {
+      console.log('Custom event detected: asset added via localStorage', e.detail);
+      const asset = e.detail;
+      // Add to UI directly
+      setAssets(prev => {
+        // Check if already exists
+        if (prev.some(a => a.id === asset.id)) return prev;
+        return [...prev, asset];
+      });
+      
+      // Update summary
+      setSummary(prev => {
+        const assetValue = parseFloat(asset.value.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalAssets: prev.totalAssets + assetValue,
+          netWorth: prev.netWorth + assetValue
+        };
+      });
+    };
+    
+    const handleLiabilityAddedEvent = (e: CustomEvent) => {
+      console.log('Custom event detected: liability added via localStorage', e.detail);
+      const liability = e.detail;
+      // Add to UI directly
+      setLiabilities(prev => {
+        if (prev.some(l => l.id === liability.id)) return prev;
+        return [...prev, liability];
+      });
+      
+      // Update summary
+      setSummary(prev => {
+        const liabilityAmount = parseFloat(liability.amount.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalLiabilities: prev.totalLiabilities + liabilityAmount,
+          netWorth: prev.netWorth - liabilityAmount
+        };
+      });
+    };
+    
+    const handleExpenseAddedEvent = (e: CustomEvent) => {
+      console.log('Custom event detected: expense added via localStorage', e.detail);
+      const expense = e.detail;
+      // Add to UI directly
+      setExpenses(prev => {
+        if (prev.some(ex => ex.id === expense.id)) return prev;
+        return [...prev, expense];
+      });
+      
+      // Update summary
+      setSummary(prev => {
+        const expenseSpent = parseFloat(expense.spent.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalExpenses: prev.totalExpenses + expenseSpent,
+          cashFlow: prev.totalIncome - (prev.totalExpenses + expenseSpent)
+        };
+      });
+    };
+    
+    const handleIncomeAddedEvent = (e: CustomEvent) => {
+      console.log('Custom event detected: income added via localStorage', e.detail);
+      const income = e.detail;
+      // Add to UI directly
+      setIncome(prev => {
+        if (prev.some(i => i.id === income.id)) return prev;
+        return [...prev, income];
+      });
+      
+      // Update summary
+      setSummary(prev => {
+        const incomeAmount = parseFloat(income.amount.replace(/[^\d.-]/g, '')) || 0;
+        return {
+          ...prev,
+          totalIncome: prev.totalIncome + incomeAmount,
+          cashFlow: (prev.totalIncome + incomeAmount) - prev.totalExpenses
+        };
+      });
+    };
+    
+    // Add event listeners for custom events
+    window.addEventListener('edgeai-asset-added', handleAssetAddedEvent as EventListener);
+    window.addEventListener('edgeai-liability-added', handleLiabilityAddedEvent as EventListener);
+    window.addEventListener('edgeai-expense-added', handleExpenseAddedEvent as EventListener);
+    window.addEventListener('edgeai-income-added', handleIncomeAddedEvent as EventListener);
+    
+    // Global data update subscription for full refresh
     const unsubscribeData = subscribe(EVENTS.DATA_UPDATED, () => {
       setAssets(getAssets());
       setLiabilities(getLiabilities());
@@ -177,6 +301,13 @@ export default function EdgeAIDemoPage() {
       setSummary(getFinancialSummary());
     });
     
+    // Refresh handler for manual update
+    const handleRefreshEvent = () => {
+      handleRefresh();
+    };
+    
+    window.addEventListener('edgeai-refresh', handleRefreshEvent);
+    
     // Cleanup subscriptions on unmount
     return () => {
       unsubscribeAssets();
@@ -184,17 +315,35 @@ export default function EdgeAIDemoPage() {
       unsubscribeExpenses();
       unsubscribeIncome();
       unsubscribeData();
+      
+      window.removeEventListener('edgeai-asset-added', handleAssetAddedEvent as EventListener);
+      window.removeEventListener('edgeai-liability-added', handleLiabilityAddedEvent as EventListener);
+      window.removeEventListener('edgeai-expense-added', handleExpenseAddedEvent as EventListener);
+      window.removeEventListener('edgeai-income-added', handleIncomeAddedEvent as EventListener);
+      window.removeEventListener('edgeai-refresh', handleRefreshEvent);
     };
-  }, [isInitialized]);
+  }, [isInitialized, handleRefresh]);
   
   // Refresh data manually
-  const handleRefresh = () => {
+  const handleRefresh = React.useCallback(() => {
     setAssets(getAssets());
     setLiabilities(getLiabilities());
     setExpenses(getExpenses());
     setIncome(getIncome());
     setSummary(getFinancialSummary());
-  };
+    
+    // Also check localStorage for any offline saved items
+    try {
+      ['edgeai_assets', 'edgeai_liabilities', 'edgeai_expenses', 'edgeai_income'].forEach(key => {
+        const localData = window.localStorage.getItem(key);
+        if (localData) {
+          console.log(`Found local data for ${key}`);
+        }
+      });
+    } catch (err) {
+      console.error('Error checking localStorage:', err);
+    }
+  }, []);
   
   // Format currency
   const formatCurrency = (amount: number) => {

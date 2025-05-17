@@ -231,9 +231,24 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               // Save back to localStorage
               window.localStorage.setItem('edgeai_assets', JSON.stringify(existingAssets));
               
-              // Manually update the UI by triggering the data-updated event
-              const event = new CustomEvent('edgeai-asset-added', { detail: result });
-              window.dispatchEvent(event);
+              // Get the page's asset list container and add the new asset directly to the DOM
+              // This is a direct UI manipulation approach to ensure immediate updates even offline
+              setTimeout(() => {
+                try {
+                  // Trigger direct UI update by dispatching a custom event
+                  const event = new CustomEvent('edgeai-asset-added', { 
+                    detail: result,
+                    bubbles: true, 
+                    cancelable: true 
+                  });
+                  document.dispatchEvent(event);
+                  
+                  // Force any React components to refresh
+                  window.dispatchEvent(new Event('storage'));
+                } catch (err) {
+                  console.error('Error updating UI directly:', err);
+                }
+              }, 100);
               
               success = true;
             }
