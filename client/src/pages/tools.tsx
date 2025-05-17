@@ -9,16 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillReminderTool } from "@/components/tools/bill-reminder-tool";
-// Voice modals are now integrated directly into asset and liability pages
 import { InterestCalculator } from "@/components/tools/interest-calculator";
 import { EMICalculator } from "@/components/tools/emi-calculator";
 import { TaxCalculator } from "@/components/tools/tax-calculator";
 import { CurrencyConverter } from "@/components/tools/currency-converter";
-import { Asset, Liability } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { 
-  Mic, 
   AlertTriangle, 
   Calculator, 
   Clock, 
@@ -30,32 +27,12 @@ import {
   Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ToolsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTool, setSelectedTool] = useState<string>("voice-input");
-
-  const handleAssetAdded = (asset: Asset) => {
-    toast({
-      title: "Asset Added",
-      description: "Your asset has been successfully added to your portfolio."
-    });
-    
-    // Invalidate the assets query to refresh the data
-    queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
-  };
-
-  const handleLiabilityAdded = (liability: Liability) => {
-    toast({
-      title: "Liability Added",
-      description: "Your liability has been successfully added to your portfolio."
-    });
-    
-    // Invalidate the liabilities query to refresh the data
-    queryClient.invalidateQueries({ queryKey: ["/api/liabilities"] });
-  };
+  const [selectedTool, setSelectedTool] = useState<string>("bill-reminder");
 
   return (
     <MainLayout>
@@ -82,14 +59,6 @@ export default function ToolsPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="space-y-1 px-1">
-                    <Button 
-                      variant={selectedTool === "voice-input" ? "default" : "ghost"} 
-                      className="w-full justify-start text-left font-normal"
-                      onClick={() => setSelectedTool("voice-input")}
-                    >
-                      <Mic className="mr-2 h-4 w-4" />
-                      Voice Input
-                    </Button>
                     <Button 
                       variant={selectedTool === "bill-reminder" ? "default" : "ghost"} 
                       className="w-full justify-start text-left font-normal"
@@ -148,10 +117,6 @@ export default function ToolsPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Mic className="h-4 w-4 text-primary" />
-                    <p className="text-sm">Voice input for quick financial data entry</p>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                     <p className="text-sm">Bill reminder to track due dates</p>
                   </div>
@@ -173,69 +138,6 @@ export default function ToolsPage() {
             
             {/* Tool content area */}
             <div className="md:col-span-9">
-              {selectedTool === "voice-input" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Voice Input Tools</CardTitle>
-                    <CardDescription>
-                      Add financial information using your voice
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="bg-muted/50 rounded-lg p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-primary/20 rounded-full">
-                          <Mic className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-medium">Voice Recognition</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Simply speak to add assets and liabilities
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <p className="mb-4">
-                        Use our advanced voice recognition system to add financial entries without typing.
-                        Our AI understands natural language and automatically extracts key financial information.
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Add Asset by Voice</CardTitle>
-                            <CardDescription>
-                              Speak to add stocks, property, or other assets
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="mb-4 text-sm">
-                              Example: "I have a fixed deposit worth 50,000 rupees with 6.5% interest rate"
-                            </p>
-                            <VoiceAssetModal onAddAsset={handleAssetAdded} />
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Add Liability by Voice</CardTitle>
-                            <CardDescription>
-                              Speak to add loans, credit card debt, or other liabilities
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="mb-4 text-sm">
-                              Example: "I have a car loan for 300,000 rupees with 8% interest rate"
-                            </p>
-                            <VoiceLiabilityModal onAddLiability={handleLiabilityAdded} />
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              
               {selectedTool === "bill-reminder" && (
                 <Card>
                   <CardHeader>
