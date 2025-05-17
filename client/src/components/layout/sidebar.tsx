@@ -223,11 +223,11 @@ export const Sidebar = () => {
             </SidebarLink>
             
             <SidebarLink 
-              href="/fraud-detection" 
+              href="/expenses" 
               icon={<Shield className="h-4 w-4" />}
-              isActive={location === "/fraud-detection"}
+              isActive={location === "/expenses"}
             >
-              Fraud Detection
+              Expenses
             </SidebarLink>
 
             <SidebarLink 
