@@ -98,7 +98,9 @@ export function VoiceFinanceAssistant({ onQueryResult }: VoiceFinanceAssistantPr
     // Process the query offline using our AI engine
     setTimeout(() => {
       try {
+        console.log('Processing query:', query);
         const result = analyzeFinanceQuery(query);
+        console.log('Query result:', result);
         setQueryResult(result);
         
         if (onQueryResult) {

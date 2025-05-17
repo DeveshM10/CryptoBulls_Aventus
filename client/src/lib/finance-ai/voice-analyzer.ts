@@ -40,22 +40,25 @@ const INTENT_PATTERNS = {
   ],
   [FinanceIntent.SPENDING_CATEGORY]: [
     'spending on', 'how much did i spend on', 'expenses for', 'category spending',
-    'transactions in', 'spending in category', 'money spent on', 'category expenses'
+    'transactions in', 'spending in category', 'money spent on', 'category expenses', 
+    'show me my spending'
   ],
   [FinanceIntent.SAVING_ADVICE]: [
     'how can i save', 'saving tips', 'save money', 'savings advice',
     'ways to save', 'increase savings', 'save more', 'recommend savings',
-    'help me save'
+    'help me save', 'tips for reducing', 'reduce costs', 'lower expenses', 
+    'cut spending', 'spend less on', 'saving on', 'reducing cost', 
+    'give me tips', 'advice for cutting', 'how to cut down'
   ],
   [FinanceIntent.DEBT_PAYOFF]: [
     'pay off debt', 'reduce debt', 'debt strategy', 'debt payoff',
     'pay down loans', 'credit card debt', 'debt free', 'loan repayment',
-    'pay off loans', 'debt reduction'
+    'pay off loans', 'debt reduction', 'manage debt', 'best way to pay off'
   ],
   [FinanceIntent.INVESTMENT_ADVICE]: [
     'investment', 'invest', 'stocks', 'bonds', 'where should i invest',
     'portfolio', 'investment strategy', 'investment advice', 'investment options',
-    'how to invest', 'investment recommendations'
+    'how to invest', 'investment recommendations', 'how should i invest'
   ]
 };
 
@@ -92,50 +95,79 @@ export function analyzeFinanceQuery(query: string): FinanceQueryResult {
     entities: {},
     response: "I'm not sure how to help with that financial question."
   };
+
+  // Extract categories first - this helps with more accurate intent detection
+  const categoryMatches = CATEGORIES.filter(category => 
+    normalizedQuery.includes(category)
+  );
   
-  // Detect intent
-  for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
-    for (const pattern of patterns) {
-      if (normalizedQuery.includes(pattern)) {
-        result.intent = intent;
-        result.confidence = 0.7; // Base confidence
-        
-        // Increase confidence if it's a strong match
-        if (normalizedQuery.startsWith(pattern)) {
-          result.confidence += 0.2;
-        }
-        
-        // Check for categories
-        const categoryMatches = CATEGORIES.filter(category => 
-          normalizedQuery.includes(category)
-        );
-        
-        if (categoryMatches.length > 0) {
-          result.entities.category = categoryMatches[0];
-          result.confidence += 0.1;
-        }
-        
-        // Check for timeframes
-        for (const timeframe of TIMEFRAMES) {
-          const timeMatches = timeframe.words.filter(word => 
-            normalizedQuery.includes(word)
-          );
+  if (categoryMatches.length > 0) {
+    result.entities.category = categoryMatches[0];
+    result.confidence += 0.1;
+    
+    // If we have a category related to entertainment and it mentions reducing/saving
+    // we can directly set the intent to saving advice
+    if ((categoryMatches[0] === 'entertainment' || categoryMatches[0] === 'streaming') && 
+        (normalizedQuery.includes('reduce') || 
+         normalizedQuery.includes('cut') || 
+         normalizedQuery.includes('save') || 
+         normalizedQuery.includes('saving') || 
+         normalizedQuery.includes('tips') || 
+         normalizedQuery.includes('advice') ||
+         normalizedQuery.includes('lower'))) {
+      result.intent = FinanceIntent.SAVING_ADVICE;
+      result.confidence = 0.9;
+    }
+  }
+  
+  // Only proceed with normal pattern matching if we haven't already assigned a high-confidence intent
+  if (result.intent === FinanceIntent.UNKNOWN || result.confidence < 0.8) {
+    // Detect intent
+    for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
+      for (const pattern of patterns) {
+        if (normalizedQuery.includes(pattern)) {
+          result.intent = intent;
+          result.confidence = Math.max(result.confidence, 0.7); // Base confidence
           
-          if (timeMatches.length > 0) {
-            result.entities.timeframe = timeframe.value;
-            result.confidence += 0.1;
-            break;
+          // Increase confidence if it's a strong match
+          if (normalizedQuery.startsWith(pattern)) {
+            result.confidence += 0.2;
           }
+          
+          // If we didn't already find categories, check again
+          if (!result.entities.category) {
+            const categoryMatches = CATEGORIES.filter(category => 
+              normalizedQuery.includes(category)
+            );
+            
+            if (categoryMatches.length > 0) {
+              result.entities.category = categoryMatches[0];
+              result.confidence += 0.1;
+            }
+          }
+          
+          // Check for timeframes
+          for (const timeframe of TIMEFRAMES) {
+            const timeMatches = timeframe.words.filter(word => 
+              normalizedQuery.includes(word)
+            );
+            
+            if (timeMatches.length > 0) {
+              result.entities.timeframe = timeframe.value;
+              result.confidence += 0.1;
+              break;
+            }
+          }
+          
+          // Break out of the loop once we've found a matching intent
+          break;
         }
-        
-        // Break out of the loop once we've found a matching intent
+      }
+      
+      // If we found a high-confidence match, no need to check other intents
+      if (result.intent !== FinanceIntent.UNKNOWN && result.confidence >= 0.8) {
         break;
       }
-    }
-    
-    // If we found a high-confidence match, no need to check other intents
-    if (result.intent !== FinanceIntent.UNKNOWN && result.confidence >= 0.8) {
-      break;
     }
   }
   
