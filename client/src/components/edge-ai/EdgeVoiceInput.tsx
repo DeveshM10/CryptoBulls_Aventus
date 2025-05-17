@@ -243,12 +243,30 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               // This is especially important when working offline
               try {
                 console.log('Dispatching edgeai-asset-added event with:', result);
+                // Send the asset data for UI update
                 const event = new CustomEvent('edgeai-asset-added', { 
                   detail: result,
                   bubbles: true, 
                   cancelable: true 
                 });
                 document.dispatchEvent(event);
+                
+                // Calculate and update financial summary immediately
+                // This is crucial for correct offline number display
+                try {
+                  const assetValue = parseFloat(result.value.replace(/[^\d.-]/g, '')) || 0;
+                  // Dispatch summary update event with the amount to add
+                  const summaryEvent = new CustomEvent('edgeai-summary-update', {
+                    detail: { 
+                      type: 'asset',
+                      value: assetValue
+                    },
+                    bubbles: true
+                  });
+                  document.dispatchEvent(summaryEvent);
+                } catch (error) {
+                  console.error('Error updating summary totals:', error);
+                }
                 
                 // Also trigger a storage event for component refresh
                 window.dispatchEvent(new Event('storage'));

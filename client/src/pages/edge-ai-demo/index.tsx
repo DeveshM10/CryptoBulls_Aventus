@@ -124,6 +124,46 @@ export default function EdgeAIDemoPage() {
   useEffect(() => {
     if (!isInitialized) return;
     
+    // Listen for direct summary updates from offline mode
+    const handleSummaryUpdate = (e: CustomEvent) => {
+      const { type, value } = e.detail;
+      
+      console.log(`Received summary update: ${type} with value ${value}`);
+      
+      // Update the financial summary based on the type of data
+      setSummary(prev => {
+        if (type === 'asset') {
+          return {
+            ...prev,
+            totalAssets: prev.totalAssets + value,
+            netWorth: prev.netWorth + value
+          };
+        } else if (type === 'liability') {
+          return {
+            ...prev,
+            totalLiabilities: prev.totalLiabilities + value,
+            netWorth: prev.netWorth - value
+          };
+        } else if (type === 'expense') {
+          return {
+            ...prev,
+            totalExpenses: prev.totalExpenses + value,
+            cashFlow: prev.totalIncome - (prev.totalExpenses + value)
+          };
+        } else if (type === 'income') {
+          return {
+            ...prev,
+            totalIncome: prev.totalIncome + value,
+            cashFlow: (prev.totalIncome + value) - prev.totalExpenses
+          };
+        }
+        return prev;
+      });
+    };
+    
+    // Add event listener for direct summary updates
+    document.addEventListener('edgeai-summary-update', handleSummaryUpdate as EventListener);
+    
     // Handler for real-time updates
     const handleAssetAdded = (asset: Asset) => {
       console.log('Asset added:', asset);
