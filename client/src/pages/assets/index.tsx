@@ -2,7 +2,6 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Plus, TrendingUp, ArrowUpRight, Filter, Download, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -37,6 +36,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal";
 
 // Define asset form schema
 const assetFormSchema = z.object({
@@ -78,7 +78,6 @@ const CustomTooltip = ({ active, payload, formatter }: any) => {
 export default function AssetsPage() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   
   // Set up form
   const form = useForm<AssetFormValues>({
@@ -162,6 +161,18 @@ export default function AssetsPage() {
     trend: 'up' | 'down';
   }
   
+  // Handle voice input asset addition
+  const handleAddAssetViaVoice = (newAsset: any) => {
+    // Invalidate queries to refresh data
+    queryClient.invalidateQueries({ queryKey: ['/api/assets'] });
+    
+    // Show success message
+    toast({
+      title: "Asset Added",
+      description: "Your asset has been successfully added via voice input.",
+    });
+  };
+  
   // Calculate totals and prepare chart data
   const totalAssetValue = assets.reduce((sum: number, asset: Asset) => 
     sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0);
@@ -243,15 +254,8 @@ export default function AssetsPage() {
                 <Download className="mr-2 h-4 w-4" />
                 <span className="whitespace-nowrap">Export</span>
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-shrink-0"
-                onClick={() => setVoiceModalOpen(true)}
-              >
-                <Mic className="mr-2 h-4 w-4" />
-                <span className="whitespace-nowrap">Voice Input</span>
-              </Button>
+              {/* Voice Asset Input */}
+              <VoiceAssetModal onAddAsset={handleAddAssetViaVoice} />
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex-shrink-0 w-full sm:w-auto">
@@ -415,232 +419,167 @@ export default function AssetsPage() {
                 <Wallet className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="h-12 flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">
-                      ₹{totalAssetValue.toLocaleString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {assets.length} <span className="ml-1">total assets</span>
-                    </p>
-                  </>
-                )}
+                <div className="text-2xl font-bold">₹{totalAssetValue.toLocaleString()}</div>
+                <div className="text-xs text-muted-foreground">+₹{(totalAssetValue * 0.02).toLocaleString()} from last month</div>
               </CardContent>
             </Card>
-            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Real Estate</CardTitle>
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-12 flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">
-                      ₹{assets
-                          .filter((asset: Asset) => asset.type.includes('real_estate'))
-                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
-                          .toLocaleString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {assets.filter((asset: Asset) => asset.type.includes('real_estate')).length} <span className="ml-1">properties</span>
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Investments</CardTitle>
+                <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="h-12 flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">
-                      ₹{assets
-                          .filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type)))
-                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
-                          .toLocaleString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {assets.filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type))).length} <span className="ml-1">investment assets</span>
-                    </p>
-                  </>
-                )}
+                <div className="text-2xl font-bold">2.5%</div>
+                <div className="flex items-center text-xs text-green-500">
+                  <ArrowUpRight className="mr-1 h-4 w-4" />
+                  <span>Up from 1.8% last quarter</span>
+                </div>
               </CardContent>
             </Card>
-            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Cash & Equivalents</CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Real Estate</CardTitle>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-muted-foreground">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
-                  <div className="h-12 flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">
-                      ₹{assets
-                          .filter((asset: Asset) => asset.type.includes('cash'))
-                          .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
-                          .toLocaleString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {assets.filter((asset: Asset) => asset.type.includes('cash')).length} <span className="ml-1">cash accounts</span>
-                    </p>
-                  </>
-                )}
+                <div className="text-2xl font-bold">
+                  ₹
+                  {assets
+                    .filter((asset: Asset) => asset.type.includes('real_estate'))
+                    .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
+                    .toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {assets.filter((asset: Asset) => asset.type.includes('real_estate')).length} <span className="ml-1">properties</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Investments</CardTitle>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-muted-foreground">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  ₹
+                  {assets
+                    .filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type)))
+                    .reduce((sum: number, asset: Asset) => sum + Number(asset.value.replace(/[^0-9.-]+/g, '')), 0)
+                    .toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {assets.filter((asset: Asset) => ['stocks', 'crypto', 'retirement'].some(type => asset.type.includes(type))).length} <span className="ml-1">investment assets</span>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="col-span-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Asset Breakdown</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                {assets.length > 0 ? 
-                  `Total: ₹${totalAssetValue.toLocaleString()}` : 
-                  "No assets to display"
-                }
-              </div>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              {isLoading ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Asset Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={assetTypeData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {assetTypeData.map((entry: ChartDataItem, index: number) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ) : assets.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center">
-                  <p className="text-muted-foreground">No assets found</p>
-                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={assetTypeData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Asset Growth</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={growthData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
                     >
-                      {assetTypeData.map((entry: ChartDataItem, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card className="col-span-full">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="value" stroke="#6366F1" activeDot={{ r: 8 }} name="Total Value" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
             <CardHeader>
-              <CardTitle>Asset Growth</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              {isLoading ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
-                </div>
-              ) : assets.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center">
-                  <p className="text-muted-foreground">No assets found</p>
-                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={growthData}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis 
-                      tickFormatter={(value) => `₹${value.toLocaleString()}`}
-                    />
-                    <Tooltip
-                      formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Total Value']}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#8884d8"
-                      activeDot={{ r: 8 }}
-                      name="Asset Value"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card className="col-span-full">
-            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Your Assets</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                {assets.length} assets total
-              </div>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="h-full flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
-                </div>
-              ) : assets.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                  <p className="text-muted-foreground">No assets found</p>
-                  <p className="text-xs text-muted-foreground mt-1">Add your first asset using the "Add Asset" button</p>
+              {assets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10">
+                  <Wallet className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium">No assets found</p>
+                  <p className="text-sm text-muted-foreground text-center mb-6">
+                    Start tracking your assets by adding your first one.
+                  </p>
+                  <Button onClick={() => setOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Your First Asset
+                  </Button>
                 </div>
               ) : (
-                <div className="rounded-md border">
-                  <div className="grid grid-cols-6 gap-4 p-4 text-sm font-medium border-b bg-muted/50">
-                    <div>Name</div>
-                    <div>Type</div>
-                    <div>Value</div>
-                    <div>Date Added</div>
-                    <div>Change</div>
-                    <div className="text-right">Actions</div>
-                  </div>
+                <div className="space-y-4">
                   {assets.map((asset: Asset) => (
-                    <div key={asset._id} className="grid grid-cols-6 gap-4 p-4 text-sm items-center border-b last:border-0">
-                      <div className="font-medium">{asset.title}</div>
-                      <div className="text-muted-foreground">
-                        {assetTypes.find(t => t.value === asset.type)?.label || asset.type}
+                    <div key={asset._id} className="flex items-center justify-between space-x-4 rounded-md border p-4">
+                      <div className="space-y-1">
+                        <p className="font-medium">{asset.title}</p>
+                        <p className="text-sm text-muted-foreground">Type: {asset.type}</p>
                       </div>
-                      <div>₹{Number(asset.value.replace(/[^0-9.-]+/g, '')).toLocaleString()}</div>
-                      <div className="text-muted-foreground">{new Date(asset.date).toLocaleDateString()}</div>
-                      <div className={asset.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
-                        {asset.trend === 'up' ? '+' : '-'}{asset.change}
-                      </div>
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end">
+                          <p className="font-medium">₹{Number(asset.value.replace(/[^0-9.-]+/g, '')).toLocaleString()}</p>
+                          <div className={`text-xs ${asset.trend === 'up' ? 'text-green-500' : 'text-red-500'} flex items-center`}>
+                            {asset.trend === 'up' ? (
+                              <ArrowUpRight className="mr-1 h-3 w-3" />
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-3 w-3">
+                                <line x1="7" y1="7" x2="17" y2="17"></line>
+                                <polyline points="17 7 17 17 7 17"></polyline>
+                              </svg>
+                            )}
+                            {asset.change}
+                          </div>
+                        </div>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
