@@ -10,7 +10,7 @@ import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
 import { Asset } from "@shared/schema"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { MicButton } from "../ui/mic-button"
+import { VoiceInputButton } from "./voice-input-button"
 
 export function AssetManagement() {
   const [showAddForm, setShowAddForm] = useState(false)
@@ -47,6 +47,11 @@ export function AssetManagement() {
       })
     }
   }
+  
+  const handleVoiceSuccess = () => {
+    // Refresh the asset list after voice input success
+    queryClient.invalidateQueries({ queryKey: ["/api/assets"] })
+  }
 
   return (
     <Tabs defaultValue="all" className="w-full">
@@ -67,19 +72,10 @@ export function AssetManagement() {
             </>}
           </Button>
           
-          <Button 
-            onClick={() => setOpen(true)} 
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Mic className="h-4 w-4" />
-            Voice Input
-          </Button>
+          <VoiceInputButton type="asset" onSuccess={handleVoiceSuccess} />
         </div>
         
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
+        {/* The Dialog component was removed, as we now use the standalone VoiceInputButton */}
               <DialogTitle>Add Asset Using Voice</DialogTitle>
               <DialogDescription>
                 Click the microphone and describe your asset. For example, "I have a stock investment worth fifty thousand rupees."
