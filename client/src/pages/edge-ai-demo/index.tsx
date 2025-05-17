@@ -17,6 +17,7 @@ import {
 } from '../../lib/edge-ai/data-store';
 import { EVENTS } from '../../lib/edge-ai/constants';
 import { EdgeVoiceInput } from '../../components/edge-ai/EdgeVoiceInput';
+import { EdgeDirectForm } from '../../components/edge-ai/EdgeDirectForm';
 import { useEdgeAI } from '../../components/edge-ai/EdgeAIProvider';
 import { Sidebar } from '../../components/layout/sidebar';
 import { 
@@ -432,10 +433,30 @@ export default function EdgeAIDemoPage() {
               <div className="flex items-center justify-between">
                 <CardTitle>Financial Data Management</CardTitle>
                 <div className="flex gap-2">
-                  {activeTab === 'assets' && <EdgeVoiceInput type="asset" onSuccess={handleRefresh} />}
-                  {activeTab === 'liabilities' && <EdgeVoiceInput type="liability" onSuccess={handleRefresh} />}
-                  {activeTab === 'expenses' && <EdgeVoiceInput type="expense" onSuccess={handleRefresh} />}
-                  {activeTab === 'income' && <EdgeVoiceInput type="income" onSuccess={handleRefresh} />}
+                  {activeTab === 'assets' && (
+                    <>
+                      <EdgeDirectForm type="asset" onSuccess={handleRefresh} />
+                      <EdgeVoiceInput type="asset" onSuccess={handleRefresh} />
+                    </>
+                  )}
+                  {activeTab === 'liabilities' && (
+                    <>
+                      <EdgeDirectForm type="liability" onSuccess={handleRefresh} />
+                      <EdgeVoiceInput type="liability" onSuccess={handleRefresh} />
+                    </>
+                  )}
+                  {activeTab === 'expenses' && (
+                    <>
+                      <EdgeDirectForm type="expense" onSuccess={handleRefresh} />
+                      <EdgeVoiceInput type="expense" onSuccess={handleRefresh} />
+                    </>
+                  )}
+                  {activeTab === 'income' && (
+                    <>
+                      <EdgeDirectForm type="income" onSuccess={handleRefresh} />
+                      <EdgeVoiceInput type="income" onSuccess={handleRefresh} />
+                    </>
+                  )}
                 </div>
               </div>
               <CardDescription>
