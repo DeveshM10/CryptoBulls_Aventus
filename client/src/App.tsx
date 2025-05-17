@@ -7,6 +7,9 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { HelmetProvider } from 'react-helmet-async';
+import { EdgeAIProvider } from "./components/edge-ai/EdgeAIProvider";
+import { initDataStore } from "./lib/edge-ai/data-store";
+import { useEffect, useState } from "react";
 import Dashboard from "@/pages/dashboard";
 import KycPage from "@/pages/kyc";
 import NotFound from "@/pages/not-found";
@@ -26,6 +29,7 @@ import PortfolioPage from "@/pages/portfolio";
 import FraudDetectionPage from "@/pages/fraud-detection";
 import ExpensesPage from "@/pages/expenses";
 import AIFinanceAssistantPage from "./pages/ai-finance-assistant";
+import EdgeAIDemoPage from "./pages/edge-ai-demo";
 
 function Router() {
   return (
@@ -47,11 +51,34 @@ function Router() {
       <ProtectedRoute path="/ai-assistant" component={AIFinanceAssistantPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
+      <ProtectedRoute path="/edge-ai" component={EdgeAIDemoPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
+
+// Initialize Edge AI when app loads
+const EdgeAIInitializer = ({ children }: { children: React.ReactNode }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        // Initialize the IndexedDB data store
+        await initDataStore();
+        setIsInitialized(true);
+        console.log('Edge AI system initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Edge AI system:', error);
+      }
+    };
+    
+    initialize();
+  }, []);
+  
+  return <>{children}</>;
+};
 
 function App() {
   return (
@@ -60,8 +87,12 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <Web3Provider>
-              <Router />
-              <Toaster />
+              <EdgeAIInitializer>
+                <EdgeAIProvider>
+                  <Router />
+                  <Toaster />
+                </EdgeAIProvider>
+              </EdgeAIInitializer>
             </Web3Provider>
           </AuthProvider>
         </QueryClientProvider>
