@@ -168,12 +168,12 @@ export function useOfflineFeatures() {
 function OfflineAlert() {
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80">
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Offline Mode</AlertTitle>
-        <AlertDescription className="flex items-center gap-2">
+      <Alert variant="warning" className="bg-amber-50 border-amber-200">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="text-amber-800">Offline Mode</AlertTitle>
+        <AlertDescription className="flex items-center gap-2 text-amber-700">
           <WifiOff className="h-4 w-4" />
-          <span>Working offline. Changes will be synced when you reconnect.</span>
+          <span>Working offline. All changes are saved directly to your device.</span>
         </AlertDescription>
       </Alert>
     </div>
