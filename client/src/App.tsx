@@ -40,6 +40,7 @@ function Router() {
       <ProtectedRoute path="/learning-hub" component={LearningHubPage} />
       <ProtectedRoute path="/tools" component={ToolsPage} />
       <ProtectedRoute path="/blockchain" component={BlockchainPage} />
+      <ProtectedRoute path="/fraud-detection" component={FraudDetectionPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
       <Route path="/auth" component={AuthPage} />

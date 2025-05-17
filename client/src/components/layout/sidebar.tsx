@@ -26,7 +26,9 @@ import {
   LogOut,
   User,
   ChevronRight,
-  Loader2
+  Loader2,
+  Shield,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -218,6 +220,14 @@ export const Sidebar = () => {
               isActive={location === "/blockchain"}
             >
               Blockchain
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/fraud-detection" 
+              icon={<Shield className="h-4 w-4" />}
+              isActive={location === "/fraud-detection"}
+            >
+              Fraud Detection
             </SidebarLink>
 
             <SidebarLink 
