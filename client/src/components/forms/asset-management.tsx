@@ -1,16 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { PlusCircle, Mic } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { AddAssetForm } from "./add-asset-form"
-import { VoiceAssetModal } from "../voice-input/voice-asset-modal"
 import { apiRequest } from "@/lib/queryClient"
 import { useToast } from "@/hooks/use-toast"
 import { Asset } from "@shared/schema"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { MicButton } from "../ui/mic-button"
 
 export function AssetManagement() {
   const [showAddForm, setShowAddForm] = useState(false)
@@ -59,21 +59,6 @@ export function AssetManagement() {
         </TabsList>
         
         <div className="flex space-x-2">
-          <VoiceAssetModal onAddAsset={handleAddAsset} />
-          
-          <Button 
-            onClick={() => {
-              const voiceButton = document.querySelector('[aria-label="Add asset with voice"]') as HTMLButtonElement;
-              if (voiceButton) {
-                voiceButton.click();
-              }
-            }}
-            variant="outline" 
-            className="bg-primary/10 hover:bg-primary/20"
-          >
-            <Mic className="h-4 w-4 text-primary" />
-          </Button>
-          
           <Button onClick={() => setShowAddForm(!showAddForm)}>
             {showAddForm ? "Cancel" : 
             <>
@@ -81,7 +66,130 @@ export function AssetManagement() {
               Add Asset
             </>}
           </Button>
+          
+          <Button 
+            onClick={() => setOpen(true)} 
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Mic className="h-4 w-4" />
+            Voice Input
+          </Button>
         </div>
+        
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Asset Using Voice</DialogTitle>
+              <DialogDescription>
+                Click the microphone and describe your asset. For example, "I have a stock investment worth fifty thousand rupees."
+              </DialogDescription>
+            </DialogHeader>
+            
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="flex flex-col gap-4 py-4">
+              {isListening && (
+                <div className="flex flex-col items-center justify-center gap-2 py-4">
+                  <div className="relative">
+                    <Mic className="h-12 w-12 text-primary animate-pulse" />
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                  </div>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Listening... Speak clearly and describe your asset.
+                  </p>
+                  
+                  {currentTranscript && (
+                    <div className="mt-2 w-full">
+                      <div className="p-3 border rounded-md bg-muted/30">
+                        <p className="text-sm">{currentTranscript}</p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => setCurrentTranscript("")}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {!isListening && !extractedData && !isProcessing && (
+                <Button onClick={handleStartListening} className="mx-auto">
+                  <Mic className="mr-2 h-4 w-4" />
+                  Start Speaking
+                </Button>
+              )}
+              
+              {isProcessing && (
+                <div className="flex flex-col items-center justify-center gap-2 py-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Processing your speech...
+                  </p>
+                </div>
+              )}
+              
+              {extractedData && !isProcessing && (
+                <div className="space-y-4">
+                  <h3 className="font-medium">Extracted Asset Information:</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Title:</span>
+                      <span className="font-medium">{extractedData.title || "Not detected"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Value:</span>
+                      <span className="font-medium">{extractedData.value || "Not detected"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="font-medium">{extractedData.type || "Not detected"}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Change:</span>
+                      <span className="font-medium">{extractedData.change || "Not detected"}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setExtractedData(null)}>
+                      Try Again
+                    </Button>
+                    <Button onClick={handleConfirmAdd}>
+                      Confirm & Add
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Voice processor component */}
+            {isListening && (
+              <VoiceProcessor
+                isListening={isListening}
+                onVoiceData={handleVoiceData}
+                onTranscriptChange={handleTranscriptChange}
+                onError={handleError}
+                onStopListening={handleStopListening}
+                processingType="asset"
+                showControls={true}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {showAddForm && (
