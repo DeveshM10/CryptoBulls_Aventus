@@ -8,7 +8,15 @@ import { Mic, Loader2 } from "lucide-react"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { VoiceProcessor } from "./voice-processor"
-import { Expense } from "@shared/schema"
+// Define the budget expense type that matches the app's structure
+interface Expense {
+  id: string;
+  title: string;
+  budgeted: string;
+  spent: string;
+  percentage: number;
+  status: "normal" | "warning" | "danger";
+}
 import { apiRequest } from "@/lib/queryClient"
 import { v4 as uuidv4 } from "uuid"
 

@@ -1,11 +1,12 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, Plus, PieChart, ArrowUpRight, ArrowDownRight, RefreshCw, IndianRupee } from "lucide-react";
+import { DollarSign, Plus, PieChart, ArrowUpRight, ArrowDownRight, RefreshCw, IndianRupee, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { AddExpenseForm, Expense } from "@/components/budget/add-expense-form";
 import { BudgetChart } from "@/components/budget/budget-chart";
 import { SpendingCategoryChart } from "@/components/budget/spending-category-chart";
+import { VoiceBudgetModal } from "@/components/voice-input/voice-budget-modal";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -100,6 +101,7 @@ export default function BudgetPage() {
                 <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
+              <VoiceBudgetModal onAddBudget={handleAddBudgetItem} />
               <AddExpenseForm onAddExpense={handleAddBudgetItem} />
             </div>
           </div>
