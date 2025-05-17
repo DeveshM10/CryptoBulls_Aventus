@@ -99,13 +99,12 @@ export function VoiceLiabilityModal({ onAddLiability }: VoiceLiabilityModalProps
   return (
     <>
       <Button 
+        onClick={() => setOpen(true)} 
         variant="outline" 
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20"
-        aria-label="Add liability with voice"
+        size="sm"
       >
-        <Mic className="h-5 w-5 text-primary" />
-        <span className="font-medium">Voice Input</span>
+        <Mic className="h-4 w-4 mr-2" />
+        Voice Input
       </Button>
       
       <Dialog open={open} onOpenChange={setOpen}>
