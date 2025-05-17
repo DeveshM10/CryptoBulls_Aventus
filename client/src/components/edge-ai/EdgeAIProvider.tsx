@@ -9,10 +9,13 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { initDataStore, loadAllData } from '../../lib/edge-ai/data-store';
 import { loadModels } from '../../lib/edge-ai/models';
+import { setupSyncListener, hasPendingSyncItems, checkForUnsyncedData } from '../../lib/edge-ai/sync-manager';
 
 interface EdgeAIContextType {
   isInitialized: boolean;
   isOffline: boolean;
+  hasPendingSync: boolean;
+  triggerSync: () => Promise<void>;
 }
 
 const EdgeAIContext = createContext<EdgeAIContextType>({
