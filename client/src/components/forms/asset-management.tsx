@@ -61,20 +61,6 @@ export function AssetManagement() {
         <div className="flex space-x-2">
           <VoiceAssetModal onAddAsset={handleAddAsset} />
           
-          <Button 
-            variant="outline"
-            className="gap-2 flex items-center"
-            onClick={() => {
-              const voiceButton = document.querySelector('[aria-label="Add asset with voice"]') as HTMLButtonElement;
-              if (voiceButton) {
-                voiceButton.click();
-              }
-            }}
-          >
-            <Mic className="h-4 w-4" />
-            Voice Input
-          </Button>
-          
           <Button onClick={() => setShowAddForm(!showAddForm)}>
             {showAddForm ? "Cancel" : 
             <>

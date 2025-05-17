@@ -100,10 +100,11 @@ export function VoiceAssetModal({ onAddAsset }: VoiceAssetModalProps) {
       <Button 
         variant="outline" 
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20"
+        aria-label="Add asset with voice"
       >
-        <Mic className="h-4 w-4" />
-        Voice Input
+        <Mic className="h-5 w-5 text-primary" />
+        <span className="font-medium">Voice Input</span>
       </Button>
       
       <Dialog open={open} onOpenChange={setOpen}>
