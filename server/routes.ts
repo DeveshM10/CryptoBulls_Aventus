@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/daily-expenses', requireAuth, dailyExpensesRouter);
   
   // Voice processing endpoint
-  app.post('/api/process-voice', requireAuth, processVoiceInput);
+  app.post('/api/voice-processor', processVoiceInput);
   
   // PDF Report generation endpoint
   app.get('/api/generate-report', requireAuth, generateReport);
