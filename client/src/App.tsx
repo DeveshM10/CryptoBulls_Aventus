@@ -25,6 +25,7 @@ import AssetsPage from "@/pages/assets";
 import PortfolioPage from "@/pages/portfolio";
 import FraudDetectionPage from "@/pages/fraud-detection";
 import ExpensesPage from "@/pages/expenses";
+import AIFinanceAssistantPage from "./pages/ai-finance-assistant";
 
 function Router() {
   return (
