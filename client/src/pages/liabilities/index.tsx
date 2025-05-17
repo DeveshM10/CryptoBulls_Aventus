@@ -254,19 +254,123 @@ export default function LiabilitiesPage() {
                 <Download className="mr-2 h-4 w-4" />
                 <span className="whitespace-nowrap">Export</span>
               </Button>
-              {/* Voice Liability Input */}
-              <VoiceLiabilityModal 
-                onAddLiability={(newLiability) => {
-                  // Invalidate queries to refresh the data
-                  queryClient.invalidateQueries({ queryKey: ['/api/liabilities'] });
-                  
-                  // Show success message
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-shrink-0"
+                onClick={() => {
                   toast({
-                    title: "Liability Added",
-                    description: "Your liability has been successfully added via voice input.",
+                    title: "Voice Input",
+                    description: "Speak clearly and say something like 'I have a home loan of 2 million rupees with 7.5% interest'",
                   });
-                }} 
-              />
+                  
+                  // Ask for microphone permission
+                  navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                      // Permission granted, show success and release stream
+                      stream.getTracks().forEach(track => track.stop());
+                      
+                      // Create a simple voice recognition instance
+                      try {
+                        // @ts-ignore - Browser API
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        const recognition = new SpeechRecognition();
+                        recognition.lang = 'en-US';
+                        recognition.interimResults = false;
+                        recognition.maxAlternatives = 1;
+                        
+                        recognition.onresult = function(event: any) {
+                          const transcript = event.results[0][0].transcript;
+                          console.log('Transcript:', transcript);
+                          
+                          // Process the voice input
+                          fetch('/api/voice-processor', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              transcript: transcript,
+                              type: 'liability'
+                            }),
+                          })
+                          .then(response => response.json())
+                          .then(data => {
+                            console.log('Processed data:', data);
+                            
+                            // Create the new liability
+                            fetch('/api/liabilities', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify(data),
+                            })
+                            .then(() => {
+                              // Refresh data
+                              queryClient.invalidateQueries({ queryKey: ['/api/liabilities'] });
+                              
+                              toast({
+                                title: "Liability Added",
+                                description: "Your liability has been successfully added via voice input.",
+                              });
+                            })
+                            .catch(error => {
+                              console.error('Error:', error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to add liability. Please try again.",
+                                variant: "destructive",
+                              });
+                            });
+                          })
+                          .catch(error => {
+                            console.error('Error:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to process voice input. Please try again.",
+                              variant: "destructive",
+                            });
+                          });
+                        };
+                        
+                        recognition.onerror = function(event: any) {
+                          console.error('Error:', event.error);
+                          toast({
+                            title: "Error",
+                            description: `Recognition error: ${event.error}`,
+                            variant: "destructive",
+                          });
+                        };
+                        
+                        // Start recognition
+                        recognition.start();
+                        
+                        toast({
+                          title: "Listening...",
+                          description: "Speak now to add a liability.",
+                        });
+                      } catch (error) {
+                        console.error('Error:', error);
+                        toast({
+                          title: "Error",
+                          description: "Speech recognition is not supported in your browser.",
+                          variant: "destructive",
+                        });
+                      }
+                    })
+                    .catch(function(err) {
+                      toast({
+                        title: "Microphone Access Denied",
+                        description: "Please allow microphone access to use voice input.",
+                        variant: "destructive",
+                      });
+                    });
+                }}
+              >
+                <Mic className="mr-2 h-4 w-4" />
+                <span className="whitespace-nowrap">Voice Input</span>
+              </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex-shrink-0 w-full sm:w-auto">
