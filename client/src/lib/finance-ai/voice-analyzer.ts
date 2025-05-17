@@ -172,16 +172,59 @@ function generateResponse(result: FinanceQueryResult): string {
       return "I can show your spending by category. Which category would you like to see?";
       
     case FinanceIntent.SAVING_ADVICE:
-      if (entities.category) {
-        return `Here are some tips to save money on ${entities.category} expenses.`;
+      if (entities.category === 'food' || entities.category === 'dining' || entities.category === 'restaurant') {
+        return `Here are specific ways to save on food expenses:
+        
+1. Meal planning: Plan your meals for the week and make a grocery list to avoid impulse purchases.
+2. Cook in batches: Prepare large portions and freeze leftovers to reduce the temptation to eat out.
+3. Use cashback apps: Apps like Ibotta or Rakuten offer cashback on grocery purchases.
+4. Bring lunch to work: This alone can save you $50-100 per week compared to buying lunch daily.
+5. Limit dining out: Try reducing restaurant meals by 25% and put the savings toward your financial goals.`;
+      } else if (entities.category === 'entertainment' || entities.category === 'streaming') {
+        return `Here are specific ways to save on entertainment expenses:
+        
+1. Subscription audit: Review all streaming services and cancel ones you rarely use.
+2. Rotation strategy: Keep only 1-2 services active at a time, switching every few months.
+3. Use free alternatives: Explore library cards for free books, movies, and sometimes even museum passes.
+4. Look for discounts: Many entertainment venues offer discounts on off-peak days or times.
+5. Share subscriptions: Consider family plans for services you use regularly.`;
+      } else if (entities.category === 'shopping' || entities.category === 'clothing') {
+        return `Here are specific ways to save on shopping expenses:
+        
+1. Wait 24 hours: Before making non-essential purchases, wait a day to avoid impulse buying.
+2. Capsule wardrobe: Focus on versatile items that can be mixed and matched.
+3. Seasonal shopping: Buy winter clothes in spring and summer clothes in fall for major discounts.
+4. Quality over quantity: Invest in fewer, higher-quality items that last longer.
+5. Second-hand options: Consider thrift stores or online marketplaces for gently used items.`;
+      } else {
+        return `Here are 5 effective money-saving strategies based on common spending patterns:
+        
+1. Follow the 50/30/20 rule: Allocate 50% of income to needs, 30% to wants, and 20% to savings and debt repayment.
+2. Automate your savings: Set up automatic transfers to savings accounts on payday before you have a chance to spend it.
+3. Review and cancel unused subscriptions: The average person wastes $273 annually on forgotten subscriptions.
+4. Use the 24-hour rule for purchases: Wait a day before buying non-essential items to prevent impulse spending.
+5. Meal plan and cook at home: You can save up to 70% on food costs by reducing restaurant meals and planning grocery shopping.`;
       }
-      return "Here are some personalized saving tips based on your spending patterns.";
       
     case FinanceIntent.DEBT_PAYOFF:
-      return "Based on your current debts, here's a recommended payoff strategy.";
+      return `Here's a recommended debt payoff strategy based on best financial practices:
+      
+1. List all your debts with their interest rates and minimum payments.
+2. While making minimum payments on all debts, put extra money toward either:
+   - The highest interest debt first (avalanche method) to minimize interest costs
+   - The smallest debt first (snowball method) for psychological wins
+3. Once a debt is paid off, roll that payment amount to the next debt.
+4. Consider balance transfer offers for high-interest credit card debt.
+5. For student loans, look into income-driven repayment plans or refinancing options.`;
       
     case FinanceIntent.INVESTMENT_ADVICE:
-      return "Here are some investment insights based on your financial situation.";
+      return `Here are key investment principles to consider for your financial situation:
+      
+1. Start with an emergency fund: Have 3-6 months of expenses saved before investing heavily.
+2. Take advantage of tax-advantaged accounts: Maximize contributions to 401(k)s (especially if employer-matched) and IRAs.
+3. Diversify across asset classes: Consider a mix of stocks, bonds, and other assets based on your risk tolerance and time horizon.
+4. Keep costs low: Look for low-fee index funds rather than actively managed funds.
+5. Invest regularly: Dollar-cost averaging helps reduce the impact of market volatility.`;
       
     default:
       return "I'm not sure how to help with that financial question. Try asking about your budget, spending, or saving tips.";
