@@ -28,7 +28,8 @@ import {
   ChevronRight,
   Loader2,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Brain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -228,6 +229,14 @@ export const Sidebar = () => {
               isActive={location === "/expenses"}
             >
               Expenses
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/ai-assistant" 
+              icon={<Brain className="h-4 w-4" />}
+              isActive={location === "/ai-assistant"}
+            >
+              AI Assistant
             </SidebarLink>
 
             <SidebarLink 

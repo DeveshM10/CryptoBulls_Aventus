@@ -44,6 +44,7 @@ function Router() {
       <ProtectedRoute path="/blockchain" component={BlockchainPage} />
       <ProtectedRoute path="/fraud-detection" component={FraudDetectionPage} />
       <ProtectedRoute path="/expenses" component={ExpensesPage} />
+      <ProtectedRoute path="/ai-assistant" component={AIFinanceAssistantPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
       <Route path="/auth" component={AuthPage} />
