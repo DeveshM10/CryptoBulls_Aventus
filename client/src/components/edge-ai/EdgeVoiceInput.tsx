@@ -231,24 +231,25 @@ export function EdgeVoiceInput({ type, onSuccess }: EdgeVoiceInputProps) {
               // Save back to localStorage
               window.localStorage.setItem('edgeai_assets', JSON.stringify(existingAssets));
               
-              // Get the page's asset list container and add the new asset directly to the DOM
-              // This is a direct UI manipulation approach to ensure immediate updates even offline
-              setTimeout(() => {
-                try {
-                  // Trigger direct UI update by dispatching a custom event
-                  const event = new CustomEvent('edgeai-asset-added', { 
-                    detail: result,
-                    bubbles: true, 
-                    cancelable: true 
-                  });
-                  document.dispatchEvent(event);
-                  
-                  // Force any React components to refresh
-                  window.dispatchEvent(new Event('storage'));
-                } catch (err) {
-                  console.error('Error updating UI directly:', err);
-                }
-              }, 100);
+              // Dispatch a custom event to ensure the UI updates immediately
+              // This is especially important when working offline
+              try {
+                console.log('Dispatching edgeai-asset-added event with:', result);
+                const event = new CustomEvent('edgeai-asset-added', { 
+                  detail: result,
+                  bubbles: true, 
+                  cancelable: true 
+                });
+                document.dispatchEvent(event);
+                
+                // Also trigger a storage event for component refresh
+                window.dispatchEvent(new Event('storage'));
+                
+                // Dispatch a general data changed event
+                document.dispatchEvent(new Event('edgeai-data-changed'));
+              } catch (err) {
+                console.error('Error dispatching events for UI update:', err);
+              }
               
               success = true;
             }
