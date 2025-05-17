@@ -6,12 +6,17 @@ import { LiabilityManagement } from "@/components/forms/liability-management"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { QuickStats } from "@/components/dashboard/quick-stats"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiRequest } from "@/lib/queryClient"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { VoiceAssetModal } from "@/components/voice-input/voice-asset-modal"
+import { VoiceLiabilityModal } from "@/components/voice-input/voice-liability-modal"
+import { Button } from "@/components/ui/button"
+import { Mic, Plus, RefreshCw } from "lucide-react"
 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("assets")
+  const queryClient = useQueryClient()
   
   // Fetch assets for chart
   const { data: assets = [] } = useQuery({
@@ -97,18 +102,30 @@ export default function PortfolioPage() {
         <div className="flex gap-4">
           {activeTab === "assets" && (
             <div className="flex items-center gap-2">
-              <VoiceAssetModal onAddAsset={(asset) => {
-                // Invalidate the query to refresh the data
-                queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
-              }} />
+              <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/assets"] })} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <VoiceAssetModal 
+                onAddAsset={(asset: any) => {
+                  // Invalidate the query to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+                }} 
+              />
             </div>
           )}
           {activeTab === "liabilities" && (
             <div className="flex items-center gap-2">
-              <VoiceLiabilityModal onAddLiability={(liability) => {
-                // Invalidate the query to refresh the data
-                queryClient.invalidateQueries({ queryKey: ["/api/liabilities"] });
-              }} />
+              <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/liabilities"] })} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <VoiceLiabilityModal 
+                onAddLiability={(liability: any) => {
+                  // Invalidate the query to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ["/api/liabilities"] });
+                }} 
+              />
             </div>
           )}
         </div>
