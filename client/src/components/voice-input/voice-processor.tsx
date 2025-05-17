@@ -53,7 +53,14 @@ export function VoiceProcessor({
         recognitionRef.current.onend = () => {
           // Auto restart if we're still supposed to be listening
           if (isListening && recognitionRef.current) {
-            recognitionRef.current.start()
+            try {
+              // Make sure we're not already listening before starting again
+              if (recognitionRef.current.state !== 'listening') {
+                recognitionRef.current.start()
+              }
+            } catch (error) {
+              console.error("Failed to restart speech recognition:", error)
+            }
           }
         }
         

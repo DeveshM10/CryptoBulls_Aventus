@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Plus, TrendingDown, ArrowDownRight, Filter, Download, Calendar } from "lucide-react";
+import { CreditCard, Plus, TrendingDown, ArrowDownRight, Filter, Download, Calendar, Mic } from "lucide-react";
+import { VoiceLiabilityModal } from "@/components/voice-input/voice-liability-modal";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -253,6 +254,19 @@ export default function LiabilitiesPage() {
                 <Download className="mr-2 h-4 w-4" />
                 <span className="whitespace-nowrap">Export</span>
               </Button>
+              {/* Voice Liability Input */}
+              <VoiceLiabilityModal 
+                onAddLiability={(newLiability) => {
+                  // Invalidate queries to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ['/api/liabilities'] });
+                  
+                  // Show success message
+                  toast({
+                    title: "Liability Added",
+                    description: "Your liability has been successfully added via voice input.",
+                  });
+                }} 
+              />
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex-shrink-0 w-full sm:w-auto">
