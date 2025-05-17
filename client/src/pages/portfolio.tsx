@@ -87,11 +87,31 @@ export default function PortfolioPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Portfolio</h2>
-        <p className="text-muted-foreground">
-          Manage your assets and liabilities with voice assistance
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Portfolio</h2>
+          <p className="text-muted-foreground">
+            Manage your assets and liabilities with voice assistance
+          </p>
+        </div>
+        <div className="flex gap-4">
+          {activeTab === "assets" && (
+            <div className="flex items-center gap-2">
+              <VoiceAssetModal onAddAsset={(asset) => {
+                // Invalidate the query to refresh the data
+                queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
+              }} />
+            </div>
+          )}
+          {activeTab === "liabilities" && (
+            <div className="flex items-center gap-2">
+              <VoiceLiabilityModal onAddLiability={(liability) => {
+                // Invalidate the query to refresh the data
+                queryClient.invalidateQueries({ queryKey: ["/api/liabilities"] });
+              }} />
+            </div>
+          )}
+        </div>
       </div>
 
       <QuickStats />
