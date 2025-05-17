@@ -42,7 +42,44 @@ import { addAsset, addLiability, addExpense, addIncome } from '../../lib/edge-ai
 import { v4 as uuidv4 } from 'uuid';
 import { addToSyncQueue } from '../../lib/edge-ai/sync-manager';
 import { format } from 'date-fns';
-import { Asset, Liability, Expense, Income } from '../../types/finance';
+
+// Define the financial data types for the Edge AI system
+interface Asset {
+  id: string;
+  title: string;
+  value: string;
+  type: string;
+  date: string;
+  change: string;
+  trend: 'up' | 'down';
+}
+
+interface Liability {
+  id: string;
+  title: string;
+  amount: string;
+  type: string;
+  interest: string;
+  payment: string;
+  dueDate: string;
+  status: 'current' | 'warning' | 'late';
+}
+
+interface Expense {
+  id: string;
+  title: string;
+  budgeted: string;
+  spent: string;
+  percentage: number;
+  status: 'normal' | 'warning' | 'danger';
+}
+
+interface Income {
+  id: string;
+  title: string;
+  amount: string;
+  description: string;
+}
 
 // Schema for different form types
 const assetSchema = z.object({
