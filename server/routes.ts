@@ -9,6 +9,7 @@ import { User, Asset, Liability, Budget } from "./models";
 import assetsRouter from "./routes/assets";
 import liabilitiesRouter from "./routes/liabilities";
 import budgetRouter from "./routes/budget";
+import transactionsRouter from "./routes/transactions";
 import { processVoiceInput } from "./api/voice-processor";
 import { generateReport } from "./api/report-generator";
 
@@ -69,6 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/assets', assetsRouter);
   app.use('/api/liabilities', liabilitiesRouter);
   app.use('/api/budget', requireAuth, budgetRouter);
+  app.use('/api/transactions', requireAuth, transactionsRouter);
   
   // Voice processing endpoint
   app.post('/api/process-voice', requireAuth, processVoiceInput);

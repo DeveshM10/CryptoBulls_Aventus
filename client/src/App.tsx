@@ -23,6 +23,7 @@ import LandingPage from "@/pages/landing";
 import AuthPage from "@/pages/auth";
 import AssetsPage from "@/pages/assets";
 import PortfolioPage from "@/pages/portfolio";
+import FraudDetectionPage from "@/pages/fraud-detection";
 
 function Router() {
   return (
