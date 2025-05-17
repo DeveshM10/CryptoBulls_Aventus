@@ -25,6 +25,7 @@ import AssetsPage from "@/pages/assets";
 import PortfolioPage from "@/pages/portfolio";
 import FraudDetectionPage from "@/pages/fraud-detection";
 import ExpensesPage from "@/pages/expenses";
+import BudgetRecommenderPage from "@/pages/budget-recommender";
 
 function Router() {
   return (
@@ -43,6 +44,7 @@ function Router() {
       <ProtectedRoute path="/blockchain" component={BlockchainPage} />
       <ProtectedRoute path="/fraud-detection" component={FraudDetectionPage} />
       <ProtectedRoute path="/expenses" component={ExpensesPage} />
+      <ProtectedRoute path="/budget-recommender" component={BudgetRecommenderPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/reports" component={ReportsPage} />
       <Route path="/auth" component={AuthPage} />

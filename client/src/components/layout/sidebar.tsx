@@ -28,7 +28,8 @@ import {
   ChevronRight,
   Loader2,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Calculator
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -228,6 +229,14 @@ export const Sidebar = () => {
               isActive={location === "/expenses"}
             >
               Expenses
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/budget-recommender" 
+              icon={<Calculator className="h-4 w-4" />}
+              isActive={location === "/budget-recommender"}
+            >
+              Budget AI
             </SidebarLink>
 
             <SidebarLink 
