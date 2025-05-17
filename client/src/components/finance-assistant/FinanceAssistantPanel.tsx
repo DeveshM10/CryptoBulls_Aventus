@@ -312,6 +312,14 @@ export function FinanceAssistantPanel() {
         <CardDescription>
           Get personalized financial insights processed locally on your device
         </CardDescription>
+        <div className="mt-2 p-3 border rounded-md bg-muted/20 text-sm">
+          <p className="font-medium mb-1">Try asking the Voice Assistant:</p>
+          <ul className="space-y-1 text-muted-foreground text-xs">
+            <li>• "How can I save money on food expenses?"</li>
+            <li>• "What's the best way to pay off my debts?"</li>
+            <li>• "Give me investment tips for beginners"</li>
+          </ul>
+        </div>
       </CardHeader>
       
       <Tabs defaultValue="insights" value={activeTab} onValueChange={setActiveTab} className="w-full">

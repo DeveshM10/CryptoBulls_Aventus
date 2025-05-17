@@ -159,9 +159,22 @@ export function VoiceFinanceAssistant({ onQueryResult }: VoiceFinanceAssistantPr
         <div className="flex flex-col items-center justify-center gap-4">
           {!isListening && !isProcessing && !queryResult && (
             <div className="text-center py-4">
-              <p className="text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-2">
                 Ask your finance assistant a question about your finances using your voice.
               </p>
+              
+              <div className="bg-muted/30 p-4 rounded-lg text-left mb-4">
+                <h4 className="text-sm font-medium mb-2">Example questions you can ask:</h4>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li><strong>Savings Tips:</strong> "How can I save money on food expenses?"</li>
+                  <li><strong>Category Advice:</strong> "Give me tips for reducing entertainment costs"</li>
+                  <li><strong>Debt Management:</strong> "What's the best way to pay off my debts?"</li>
+                  <li><strong>Investment Strategy:</strong> "How should I invest my money?"</li>
+                  <li><strong>Budget Review:</strong> "How am I doing on my budget this month?"</li>
+                  <li><strong>Spending Analysis:</strong> "Show me my spending in the dining category"</li>
+                </ul>
+              </div>
+              
               <Button onClick={handleStartListening} className="bg-primary">
                 <Mic className="mr-2 h-4 w-4" />
                 Start Listening
