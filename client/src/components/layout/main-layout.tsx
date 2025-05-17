@@ -1,5 +1,6 @@
 import React from "react";
 import { Sidebar } from "@/components/layout/sidebar";
+import { VoiceFloatingActionButton } from "@/components/global/voice-fab";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -30,6 +31,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 ml-0 md:ml-64 lg:ml-72">
           {children}
         </main>
+        
+        {/* Voice Input Floating Action Button */}
+        <VoiceFloatingActionButton />
       </div>
     </div>
   );
