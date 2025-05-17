@@ -212,8 +212,35 @@ export class FinanceAssistant {
     const config = { ...DEFAULT_SAVING_PARAMS, ...params };
     const opportunities: FinanceInsight[] = [];
     
-    // Need minimum amount of data
-    if (this.expenses.length < 10) {
+    // Always provide at least some meaningful tips even with limited data
+    if (this.expenses.length < 3) {
+      // Add generic tips when little expense data is available
+      opportunities.push({
+        id: `saving-general-${Date.now()}`,
+        type: 'tip',
+        title: 'Start tracking expenses by category',
+        description: 'To identify saving opportunities, begin by categorizing your expenses. This will help you see where your money is going and find areas to cut back.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Learn How'
+        }
+      });
+      
+      opportunities.push({
+        id: `saving-50-30-20-${Date.now()}`,
+        type: 'tip',
+        title: 'Consider the 50/30/20 budget rule',
+        description: 'A simple way to budget is the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings and debt repayment.',
+        severity: 'low',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Learn More'
+        }
+      });
+      
       return opportunities;
     }
     
@@ -222,29 +249,37 @@ export class FinanceAssistant {
     const now = new Date();
     const monthAgo = new Date(now.setDate(now.getDate() - 30));
     
+    // Extract all categories from expenses, not just the predefined ones
+    const allCategories = new Set<string>();
+    
     this.expenses.forEach(expense => {
+      if (!expense.category) return;
+      
+      const category = expense.category.toLowerCase();
+      allCategories.add(category);
+      
       const expenseDate = new Date(expense.date);
-      if (expenseDate >= monthAgo && config.categories.includes(expense.category)) {
-        if (!categorySpending[expense.category]) {
-          categorySpending[expense.category] = 0;
+      if (expenseDate >= monthAgo) {
+        if (!categorySpending[category]) {
+          categorySpending[category] = 0;
         }
-        categorySpending[expense.category] += parseFloat(expense.amount);
+        categorySpending[category] += parseFloat(expense.amount);
       }
     });
     
-    // Check for saving opportunities
+    // Check for saving opportunities across all categories
     Object.entries(categorySpending).forEach(([category, totalSpent]) => {
-      if (totalSpent >= config.minAmount) {
+      if (totalSpent >= config.minAmount / 2) { // Lower threshold to be more helpful
         const potentialSaving = Math.round(totalSpent * (config.threshold / 100));
         
-        if (potentialSaving >= 20) { // Only suggest if savings are meaningful
+        if (potentialSaving >= 10) { // Provide more tips by lowering the threshold
           opportunities.push({
             id: `saving-${category}-${Date.now()}`,
             type: 'tip',
             title: `Saving opportunity in ${category}`,
-            description: `You could save approximately $${potentialSaving} by reducing your ${category} expenses by ${config.threshold}%.`,
+            description: `Based on your spending patterns, you could save approximately $${potentialSaving} by reducing your ${category} expenses by ${config.threshold}%.`,
             category,
-            severity: 'low',
+            severity: totalSpent > config.minAmount ? 'medium' : 'low',
             timestamp: new Date(),
             actionable: true,
             action: {
@@ -254,6 +289,68 @@ export class FinanceAssistant {
         }
       }
     });
+    
+    // Add category-specific advice based on spending patterns
+    if (categorySpending['dining'] || categorySpending['food'] || categorySpending['restaurant']) {
+      opportunities.push({
+        id: `saving-food-${Date.now()}`,
+        type: 'tip',
+        title: 'Reduce food expenses',
+        description: 'Try meal planning and cooking at home more often. You could save up to 70% compared to eating out regularly.',
+        category: 'dining',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Get Meal Ideas'
+        }
+      });
+    }
+    
+    if (categorySpending['entertainment'] || categorySpending['streaming']) {
+      opportunities.push({
+        id: `saving-entertainment-${Date.now()}`,
+        type: 'tip',
+        title: 'Optimize subscription services',
+        description: 'Review your streaming subscriptions and consider rotating services instead of having them all at once.',
+        category: 'entertainment',
+        severity: 'low',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'View Subscriptions'
+        }
+      });
+    }
+    
+    // If we still don't have any opportunities, add generic ones
+    if (opportunities.length === 0) {
+      opportunities.push({
+        id: `saving-general-${Date.now()}`,
+        type: 'tip',
+        title: 'Implement the 50/30/20 Budget Rule',
+        description: 'Consider allocating 50% of income to necessities, 30% to wants, and 20% to savings and debt repayment.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Learn More'
+        }
+      });
+      
+      opportunities.push({
+        id: `saving-automate-${Date.now()}`,
+        type: 'tip',
+        title: 'Automate your savings',
+        description: 'Set up automatic transfers to your savings account on payday to build savings without thinking about it.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'How To Automate'
+        }
+      });
+    }
     
     return opportunities;
   }
@@ -375,22 +472,73 @@ export class FinanceAssistant {
   ): FinanceInsight[] {
     const tips: FinanceInsight[] = [];
     
+    // Always provide meaningful tips even with limited data
+    if (expenses.length === 0 && assets.length === 0 && liabilities.length === 0) {
+      tips.push({
+        id: `tip-budget-${Date.now()}`,
+        type: 'tip',
+        title: 'Create a personal budget',
+        description: 'The foundation of financial success is a clear budget. Start by tracking your income and expenses to understand your spending patterns.',
+        severity: 'high',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Budget Template'
+        }
+      });
+      
+      tips.push({
+        id: `tip-emergency-fund-${Date.now()}`,
+        type: 'tip',
+        title: 'Start an emergency fund',
+        description: 'Before investing or paying off low-interest debt, build an emergency fund covering 3-6 months of essential expenses.',
+        severity: 'high',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Learn More'
+        }
+      });
+      
+      tips.push({
+        id: `tip-goals-${Date.now()}`,
+        type: 'tip',
+        title: 'Set clear financial goals',
+        description: 'Defining specific, measurable financial goals will help guide your saving and spending decisions.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Goal Setting Guide'
+        }
+      });
+      
+      return tips;
+    }
+    
     // Calculate monthly expenses
     const totalMonthlyExpenses = expenses.reduce(
-      (sum, expense) => sum + parseFloat(expense.amount), 0
+      (sum, expense) => sum + parseFloat(expense.amount || '0'), 0
     ) / 12; // Assuming annual or convert as needed
     
-    // Tip 1: Emergency fund
+    // Tip: Emergency fund
+    let hasLiquidAssets = false;
     const liquidAssets = assets
-      .filter(a => ['cash', 'savings', 'checking'].includes(a.type.toLowerCase()))
-      .reduce((sum, asset) => sum + parseFloat(asset.value), 0);
+      .filter(a => {
+        const type = (a.type || '').toLowerCase();
+        return ['cash', 'savings', 'checking'].includes(type);
+      })
+      .reduce((sum, asset) => {
+        hasLiquidAssets = true;
+        return sum + parseFloat(asset.value || '0');
+      }, 0);
     
-    if (liquidAssets < totalMonthlyExpenses * 3) {
+    if (!hasLiquidAssets || liquidAssets < totalMonthlyExpenses * 3) {
       tips.push({
         id: `tip-emergency-fund-${Date.now()}`,
         type: 'tip',
         title: 'Build an emergency fund',
-        description: 'Aim to save 3-6 months of expenses in easily accessible accounts.',
+        description: 'Financial experts recommend saving 3-6 months of expenses in easily accessible accounts to handle unexpected costs.',
         severity: 'medium',
         timestamp: new Date(),
         actionable: true,
@@ -400,17 +548,22 @@ export class FinanceAssistant {
       });
     }
     
-    // Tip 2: High-interest debt
+    // Tip: High-interest debt
+    let hasHighInterestDebt = false;
     const highInterestDebt = liabilities
-      .filter(l => parseFloat(l.interest) > 10)
-      .reduce((sum, liability) => sum + parseFloat(liability.amount), 0);
+      .filter(l => {
+        const interest = parseFloat(l.interest || '0');
+        hasHighInterestDebt = hasHighInterestDebt || interest > 10;
+        return interest > 10;
+      })
+      .reduce((sum, liability) => sum + parseFloat(liability.amount || '0'), 0);
     
-    if (highInterestDebt > 0) {
+    if (hasHighInterestDebt) {
       tips.push({
         id: `tip-high-interest-debt-${Date.now()}`,
         type: 'tip',
         title: 'Prioritize high-interest debt',
-        description: 'Focus on paying down your high-interest debt to save money in the long run.',
+        description: 'Pay down debts with interest rates above 10% first to minimize interest costs and improve your financial health.',
         severity: 'high',
         timestamp: new Date(),
         actionable: true,
@@ -420,24 +573,83 @@ export class FinanceAssistant {
       });
     }
     
-    // Tip 3: Diversification
+    // Tip: Diversification
+    const investmentAssets = assets.filter(a => {
+      const type = (a.type || '').toLowerCase();
+      return ['stocks', 'bonds', 'crypto', 'etf', 'mutual fund', 'investment'].includes(type);
+    });
+    
     const investmentTypes = new Set(
-      assets
-        .filter(a => ['stocks', 'bonds', 'crypto', 'etf', 'mutual fund'].includes(a.type.toLowerCase()))
-        .map(a => a.type.toLowerCase())
+      investmentAssets.map(a => (a.type || '').toLowerCase())
     );
     
-    if (investmentTypes.size < 3 && assets.length > 0) {
+    if (investmentTypes.size < 2 && assets.length > 0) {
       tips.push({
         id: `tip-diversification-${Date.now()}`,
         type: 'tip',
         title: 'Diversify your investments',
-        description: 'Consider spreading your investments across different asset types to reduce risk.',
+        description: 'Spreading investments across different asset types can help reduce risk and stabilize returns in varying market conditions.',
         severity: 'low',
         timestamp: new Date(),
         actionable: true,
         action: {
           label: 'Learn How'
+        }
+      });
+    }
+    
+    // Tip: Retirement planning
+    let hasRetirementAccount = false;
+    assets.forEach(asset => {
+      const type = (asset.type || '').toLowerCase();
+      if (type.includes('retirement') || type.includes('401k') || type.includes('ira')) {
+        hasRetirementAccount = true;
+      }
+    });
+    
+    if (!hasRetirementAccount && assets.length > 0) {
+      tips.push({
+        id: `tip-retirement-${Date.now()}`,
+        type: 'tip',
+        title: 'Start retirement planning',
+        description: 'Consider opening a retirement account to take advantage of tax benefits and compound growth over time.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Retirement Options'
+        }
+      });
+    }
+    
+    // Tip: Income diversification
+    if (expenses.length > 0) {
+      tips.push({
+        id: `tip-income-${Date.now()}`,
+        type: 'tip',
+        title: 'Consider multiple income streams',
+        description: 'Building additional income sources can provide financial stability and accelerate your path to financial goals.',
+        severity: 'low',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Income Ideas'
+        }
+      });
+    }
+    
+    // Tip: Tax optimization
+    if (assets.length > 0 || liabilities.length > 0) {
+      tips.push({
+        id: `tip-tax-${Date.now()}`,
+        type: 'tip',
+        title: 'Optimize your tax strategy',
+        description: 'Review potential tax deductions and credits related to your assets, investments, and liabilities to minimize tax burden.',
+        severity: 'medium',
+        timestamp: new Date(),
+        actionable: true,
+        action: {
+          label: 'Tax Guide'
         }
       });
     }
