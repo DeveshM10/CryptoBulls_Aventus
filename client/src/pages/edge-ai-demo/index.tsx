@@ -298,6 +298,7 @@ export default function EdgeAIDemoPage() {
       document.removeEventListener('edgeai-expense-added', handleExpenseAddedEvent as EventListener);
       document.removeEventListener('edgeai-income-added', handleIncomeAddedEvent as EventListener);
       document.removeEventListener('edgeai-refresh', handleRefreshEvent);
+      document.removeEventListener('edgeai-summary-update', handleSummaryUpdate as EventListener);
     };
   }, [isInitialized, handleRefresh]);
   
